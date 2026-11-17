@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SDP — محاكاة حقل الري المحوري</title><link rel="icon" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap">
+<style>
+:root{
+  --ink:#1d2b24; --ink-soft:#4d5e55; --panel:rgba(250,247,238,.92); --line:rgba(29,43,36,.16);
+  --accent:#1f6b4a; --accent-ink:#ffffff; --sand:#c9893c; --red:#d62828;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ink:#eef2e8; --ink-soft:#b4c2b8; --panel:rgba(22,32,27,.9); --line:rgba(238,242,232,.18);
+    --accent:#58c28f; --accent-ink:#0f1f17; --sand:#e0a65a; --red:#ff6b6b;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#eef2e8; --ink-soft:#b4c2b8; --panel:rgba(22,32,27,.9); --line:rgba(238,242,232,.18);
+  --accent:#58c28f; --accent-ink:#0f1f17; --sand:#e0a65a; --red:#ff6b6b;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0;overflow:hidden;background:#d8e6ee;color:var(--ink);font-family:"Tajawal",system-ui,"Segoe UI",Tahoma,sans-serif}
+#scene{position:fixed;inset:0;touch-action:none;cursor:grab}
+canvas{display:block;width:100%;height:100%}
+.top{position:fixed;top:calc(env(safe-area-inset-top,0px) + 56px);right:10px;left:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;pointer-events:none}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;backdrop-filter:blur(6px);pointer-events:auto}
+.brand h1{margin:0;font-size:1.05rem;font-weight:700}
+.brand p{margin:3px 0 0;font-size:.78rem;color:var(--ink-soft);display:flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:14px;height:14px;border:2px solid var(--red);border-radius:3px;flex:none}
+.badge{font-size:.78rem;color:var(--ink-soft);text-align:left;max-width:44%}
+.badge b{color:var(--accent);direction:ltr;unicode-bidi:embed}
+.views{position:fixed;right:10px;top:calc(env(safe-area-inset-top,0px) + 128px);display:flex;flex-direction:column;gap:6px;padding:8px}
+.bar{position:fixed;right:10px;left:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;pointer-events:none}
+button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:9px 16px;background:var(--accent);color:var(--accent-ink);cursor:pointer;min-width:90px}
+button.sm{background:transparent;color:var(--ink);border:1px solid var(--line);padding:6px 10px;font-size:.82rem;font-weight:500;text-align:right}
+button.sm.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sand);outline-offset:2px}
+label{display:flex;align-items:center;gap:10px;font-size:.9rem}
+input[type=range]{accent-color:var(--accent);width:120px}
+.read{display:flex;gap:14px;font-size:.86rem}
+.read span{color:var(--ink-soft)} .read b{color:var(--ink);font-variant-numeric:tabular-nums}
+.sens{position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 128px);font-size:.78rem;min-width:210px}
+.sens .hd{font-weight:700;margin-bottom:2px}.sens .lg{color:var(--ink-soft);font-size:.7rem;margin-bottom:6px}
+.sens .row{display:grid;grid-template-columns:58px 40px 34px 1fr;gap:6px;align-items:center;padding:2px 0;border-top:1px solid var(--line)}
+.sens .row b{font-variant-numeric:tabular-nums}.sens .st{padding-inline-start:6px;border-inline-start:6px solid var(--line)}
+@media (max-width:560px){.badge{display:none}.sens{font-size:.68rem;min-width:0;padding:6px 8px}.sens .row{grid-template-columns:44px 32px 28px 1fr}}
+.left{position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 128px);display:flex;flex-direction:column;gap:8px;max-height:calc(100% - 250px);overflow:auto;width:230px}
+.sens{position:static;min-width:0}
+.brain{font-size:.78rem;display:flex;flex-direction:column;gap:6px}
+.brain .hd{font-weight:700}.brain label{justify-content:space-between;font-size:.78rem}
+.brain select{font:inherit;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:2px 4px}
+.brain .kv{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;text-align:center}.brain .kv span{display:block;color:var(--ink-soft);font-size:.68rem}
+.brain .dec{border-top:1px solid var(--line);padding-top:6px;line-height:1.5;min-height:4em}
+button:disabled{opacity:.45;cursor:not-allowed}
+.right{position:fixed;right:10px;top:calc(env(safe-area-inset-top,0px) + 128px);display:flex;flex-direction:column;gap:8px;max-height:calc(100% - 250px);overflow:auto}
+.views{position:static}
+.faults{display:flex;flex-direction:column;gap:6px;font-size:.78rem}.faults .hd{font-weight:700}
+.toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 118px);display:flex;flex-direction:column;gap:6px;width:min(440px,92%);pointer-events:none}
+.toast{background:var(--panel);border:1px solid var(--line);border-inline-start:6px solid #e74c3c;border-radius:10px;padding:8px 12px;font-size:.82rem;line-height:1.5}
+.toast.green{border-inline-start-color:#2ecc71}.toast.gray{border-inline-start-color:#7f8c8d}.toast.amber{border-inline-start-color:#f1c40f}
+@media (max-width:560px){.right{max-width:150px}.faults{font-size:.7rem}}
+.calc{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(370px,92%);max-height:calc(100% - 120px);overflow:auto;display:none;flex-direction:column;gap:8px;font-size:.82rem;z-index:5}
+.calc.open{display:flex}.calc .hd{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:.95rem}
+.calc label{justify-content:space-between}.calc input[type=number]{width:90px;font:inherit;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:3px 6px}
+.calc select{font:inherit;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:3px 4px;max-width:190px}
+.calc .out{display:grid;grid-template-columns:1fr auto;gap:4px 10px;border-top:1px solid var(--line);padding-top:8px}.calc .out b{font-variant-numeric:tabular-nums}
+.calc .big{font-size:1.05rem;color:var(--accent)}.calc .note{font-size:.7rem;color:var(--ink-soft);line-height:1.6}
+@media (max-width:560px){.left{width:176px}.brain{font-size:.7rem}}
+
+.en,.adv{font-size:.78rem;display:flex;flex-direction:column;gap:6px}.en .hd,.adv .hd{font-weight:700}
+.kv3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;text-align:center}.kv3 span{display:block;color:var(--ink-soft);font-size:.68rem}
+.bat{height:8px;border-radius:6px;background:var(--line);overflow:hidden}.bat i{display:block;height:100%;width:50%;background:#2ecc71}
+.src{font-weight:700;padding:4px 8px;border-radius:8px;background:var(--line)}
+.lgd{display:flex;flex-wrap:wrap;gap:8px;color:var(--ink-soft);font-size:.66rem}.lgd i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-inline-end:3px}
+.adv .tip{display:flex;flex-direction:column;gap:5px}.adv .tip div{padding:5px 8px;border-radius:8px;background:var(--line);line-height:1.5;border-inline-start:4px solid var(--accent)}
+.adv .tip .w{border-inline-start-color:#e74c3c}.adv .tip .a{border-inline-start-color:#f1c40f}
+.chips{display:flex;flex-wrap:wrap;gap:5px}.chips button{min-width:0;padding:4px 8px;font-size:.72rem}
+.adv .ans{line-height:1.6;min-height:2.4em;border-top:1px solid var(--line);padding-top:6px}.adv .note{font-size:.64rem;color:var(--ink-soft);line-height:1.6}.adv a{color:var(--accent)}
+
+.snav{position:fixed;top:0;right:0;left:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 6px) 14px 6px;background:var(--panel);border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+.snav a{color:var(--ink);text-decoration:none;font-size:.88rem;padding:5px 12px;border-radius:999px}.snav a.on{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.snav .b{display:flex;align-items:center;gap:8px;font-weight:700}.snav img{width:30px;height:30px;border-radius:50%}
+#err{display:none;position:fixed;z-index:40;left:10px;right:10px;top:110px;background:#7a1f1f;color:#fff;padding:10px 14px;border-radius:10px;font-size:.85rem}
+.guide{position:fixed;z-index:25;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,92%);max-height:70%;overflow:auto;display:none;font-size:.84rem;line-height:1.7}
+.guide.open{display:block}.guide h3{margin:0 0 8px}.guide li{margin-bottom:6px}.guide .sw{vertical-align:middle;margin-inline-end:6px}
+</style>
+</head>
+<body><nav id="simnav" style="position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translateX(-50%);z-index:9999;display:flex;gap:2px;padding:4px;border-radius:100px;background:#07503f;font-family:Tajawal,system-ui,sans-serif;direction:rtl">
+<a href="index.html" style="color:#fff;background:transparent;text-decoration:none;padding:5px 14px;border-radius:100px;font-size:.82rem;white-space:nowrap">الرئيسية</a><a href="solution.html" style="color:#fff;background:transparent;text-decoration:none;padding:5px 14px;border-radius:100px;font-size:.82rem;white-space:nowrap">الحل التقني</a><a href="simulation.html" style="color:#212529;background:#fff;text-decoration:none;padding:5px 14px;border-radius:100px;font-size:.82rem;white-space:nowrap">محاكاة الحقل</a><a href="stats.html" style="color:#fff;background:transparent;text-decoration:none;padding:5px 14px;border-radius:100px;font-size:.82rem;white-space:nowrap">الإحصائيات</a>
+</nav>
+<div class="snav"><a class="b" href="index.html"><img src="assets/logo.png" alt="SDP">SDP</a><nav><a href="index.html">الرئيسية</a> <a href="simulation.html" class="on">المحاكاة</a> <a href="stats.html">الإحصائيات</a></nav></div>
+<div id="err" role="alert"></div>
+<div class="card guide" id="guide"><h3>ما الذي تضيفه SDP؟ (الإطار الأحمر)</h3><ul>
+<li><b>خزانة التحكم (ESP32-S3):</b> تقرر الري والحماية محليًا.</li><li><b>عقد التربة السبع:</b> رطوبة وملوحة عبر LoRa.</li><li><b>حساس الضغط وصندوق الطرف:</b> يكشفان هبوط الضغط وحالة الذراع.</li><li><b>صندوق حماية المضخة:</b> يفصل عند قطع الطور.</li><li><b>محطة الأرصاد:</b> حرارة ورياح لحساب ETc.</li><li><b>محطة الطاقة (خارج الحقل):</b> ألواح ← منظّم MPPT ← بطاريات ← عاكس ← ATS، مع الشبكة العمومية احتياطًا.</li></ul>
+<p class="note" style="color:var(--ink-soft)">زر «محطة الطاقة» في الزوايا ينقلك إليها. كل القيم محاكاة.</p><button id="gx" type="button" class="sm" style="min-width:0">إغلاق</button></div>
+<div id="scene"></div>
+
+<div class="top">
+  <div class="card brand">
+    <h1>Smart Desert Pivot — التوأم الرقمي</h1>
+    <p><i class="sw"></i>إطار أحمر = إضافات SDP (IoT وطاقة)، والباقي تقليدي · الكوابل: أحمر/أسود تيار مستمر، رمادي تيار متردد</p>
+  </div>
+  <div class="card badge">علامة «مشروع مبتكر» رقم <b>09072522272</b><br>جامعة قاصدي مرباح ورقلة</div>
+</div>
+
+<div class="right" id="right"><div class="card views" id="views"></div>
+<div class="card faults"><div class="hd">محاكاة الأعطال</div>
+<button id="fPhase" type="button" class="sm">قطع طور كهربائي</button>
+<button id="fPress" type="button" class="sm">هبوط ضغط الماء</button>
+<button id="fNet" type="button" class="sm">قطع الإنترنت</button>
+<button id="swbtn" type="button" class="sm">المفتاح: SDP (الحماية مفعّلة)</button>
+<button id="fReset" type="button" class="sm">إعادة ضبط</button>
+<div id="link" style="color:var(--ink-soft)">الاتصال: 4G متصل</div></div></div>
+<div class="left" id="left"><div class="card sens"><div class="hd">عقد التربة (LoRa)</div><div class="lg">رطوبة % · ملوحة EC بوحدة dS/m</div><div id="rows"></div></div>
+<div class="card brain"><div class="hd">العقل الذكي (ET0 × Kc)</div><div id="wx"></div>
+<label>المحصول <select id="crop"><option value="0">قمح صلب</option><option value="1">بطاطس</option><option value="2">أعلاف</option></select></label>
+<label>المرحلة <select id="stage"><option value="0">إنبات</option><option value="1">نمو خضري</option><option value="2" selected>إزهار</option><option value="3">نضج</option></select></label>
+<div class="kv"><div><span>ET0 مم/يوم</span><b id="et0">0</b></div><div><span>Kc</span><b id="kc">0</b></div><div><span>ETc مم/يوم</span><b id="etc">0</b></div></div>
+<button id="autobtn" type="button" class="sm">الوضع التلقائي: متوقف</button>
+<button id="dustbtn" type="button" class="sm">محاكاة عاصفة رياح وغبار</button>
+<div class="dec" id="dec">الوضع اليدوي: أنت تتحكم. فعّل الوضع التلقائي ليقرر النظام.</div></div>
+<div class="card en"><div class="hd">منظومة الطاقة (شمس · بطارية · شبكة)</div>
+<div class="kv3"><div><span>إنتاج شمسي kW</span><b id="eSol">0</b></div><div><span>الحمل kW</span><b id="eLoad">0</b></div><div><span>البطارية %</span><b id="eSoc">0</b></div></div>
+<div class="bat"><i id="eBar"></i></div><div class="src" id="eSrc">المصدر: —</div>
+<div class="lgd"><span><i style="background:#ffd23f"></i>شمس</span><span><i style="background:#4cd964"></i>بطارية</span><span><i style="background:#4aa3ff"></i>شبكة</span><span><i style="background:#ff9f43"></i>حمل</span></div></div>
+<div class="card adv"><div class="hd">المرشد الذكي · ولاية ورقلة</div><div class="tip" id="aTip"></div>
+<div class="chips"><button type="button" class="sm" data-q="irr">متى أروي؟</button><button type="button" class="sm" data-q="pow">وضع الطاقة</button><button type="button" class="sm" data-q="wx">الطقس والمناخ</button><button type="button" class="sm" data-q="risk">المخاطر الآن</button></div>
+<div class="ans" id="aAns">اختر سؤالًا من الأزرار.</div>
+<div class="note">المرشد هنا محرك قواعد يعمل على بيانات المحاكاة ومعدلات مناخ ورقلة، وليس توقعًا رسميًا. للتوقع الرسمي المباشر: <a href="https://www.meteoblue.com/en/weather/week/ouargla-province_algeria_2485794" target="_blank" rel="noopener">meteoblue ورقلة</a></div></div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<div class="card calc" id="calc"><div class="hd"><span>حاسبة الجدوى لمحور واحد</span><button id="calcx" type="button" class="sm" style="min-width:0">إغلاق</button></div>
+<label>مساحة المحور (هكتار) <input id="cArea" type="number" min="1" max="100" value="40"></label>
+<label>المحصول <select id="cCrop"><option value="0">قمح صلب (≈ 6500 م³/هكتار)</option><option value="1">بطاطس (≈ 6000)</option><option value="2">أعلاف (≈ 15000)</option></select></label>
+<label>كلفة المتر المكعب (دج) <input id="cCost" type="number" min="0.5" step="0.5" value="4"></label>
+<label>نسبة التوفير <span><input id="cSave" type="range" min="20" max="45" value="35"> <b id="cSaveV">35%</b></span></label>
+<div class="out"><span>استهلاك الماء السنوي</span><b id="oUse"></b><span>ماء مُوَفَّر سنويًا</span><b id="oM3"></b><span>قيمة التوفير السنوي</span><b id="oD"></b><span>الصافي بعد اشتراك 48,000 دج</span><b id="oNet"></b><span>مدة استرداد الصندوق (320,000 دج شاملة التركيب)</span><b id="oPay" class="big"></b></div>
+<div class="out"><span>عدّاد التوفير الحي في المحاكاة (الوضع التلقائي)</span><button id="lvReset" type="button" class="sm" style="min-width:0">تصفير</button><span>ماء موفَّر</span><b id="lvM3">0 م³</b><span>قيمته</span><b id="lvD" class="big">0 دج</b></div>
+<div class="note">الأرقام تقديرية وتُستبدل بقياس ميداني: استهلاك المحاصيل من تقديري التقريبي، ونسبة التوفير 35% داخل مجال 30–40% المذكور في تقريركم، وكلفة المتر المكعب (كهرباء أو مازوت) عدّلها حسب مزرعة الفلاح. الصندوق 280,000 + تركيب 40,000 دج. العدّاد يعمل عند الري في الوضع التلقائي، وساعة المحاكاة تمر أسرع من الحقيقية.</div></div>
+<div class="bar">
+  <div class="card" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+    <button id="toggle" type="button">إيقاف</button>
+    <button id="pumpbtn" type="button">تشغيل المضخة</button>
+    <button id="layerbtn" type="button" class="sm">إخفاء طبقة الرطوبة</button>
+    <button id="panelbtn" type="button" class="sm">إخفاء اللوحات</button>
+    <button id="tmbtn" type="button" class="sm">الوقت: تلقائي</button>
+    <button id="rainbtn" type="button" class="sm">محاكاة هطول الأمطار</button>
+    <button id="sndbtn" type="button" class="sm">الصوت: متوقف</button>
+    <button id="calcbtn" type="button">حاسبة الجدوى</button>
+    <button id="gbtn" type="button" class="sm">شرح الإضافات</button>
+    <label>السرعة <input id="speed" type="range" min="0.1" max="1" step="0.05" value="0.4" aria-label="سرعة دوران المحور"></label>
+  </div>
+  <div class="card read">
+    <div><span>الحالة: </span><b id="state">يعمل</b></div>
+    <div><span>الزاوية: </span><b id="angle">0°</b></div>
+    <div><span>التوفير المحاكى: </span><b id="sv">0 دج</b></div>
+    <div><span>المضخة: </span><b id="pstate">متوقفة</b></div>
+    <div><span>الضغط: </span><b id="prs">0.0 بار</b></div>
+    <div><span>التدفق: </span><b id="flw">0 م³/س</b></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+var errEl=document.getElementById('err');function showErr(e){if(errEl){errEl.style.display='block';errEl.textContent='خطأ برمجي: '+(e&&e.message||e)}}
+window.addEventListener('error',function(e){showErr(e.message)});
+if(typeof THREE==='undefined'){showErr('تعذّر تحميل مكتبة Three.js. تحقق من الاتصال بالإنترنت ثم أعد تحميل الصفحة.')}
+(function(){
+  var T=THREE, wrap=document.getElementById('scene'),SMART=[];
+  var renderer=new T.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+  wrap.appendChild(renderer.domElement);
+  var scene=new T.Scene();
+  scene.background=new T.Color(0xcfe3ef);
+  scene.fog=new T.Fog(0xe3e6df,120,330);
+  var camera=new T.PerspectiveCamera(48,1,0.1,800);
+
+  // سماء متدرجة
+  var sg=new T.SphereGeometry(500,24,16),sc=[],sp=sg.attributes.position,c1=new T.Color(0x6fa6d6),c2=new T.Color(0xf1e6cf),tc=new T.Color();
+  for(var i=0;i<sp.count;i++){tc.copy(c2).lerp(c1,Math.max(0,Math.min(1,sp.getY(i)/320)));sc.push(tc.r,tc.g,tc.b)}
+  sg.setAttribute('color',new T.Float32BufferAttribute(sc,3));
+  var skyM=new T.Mesh(sg,new T.MeshBasicMaterial({vertexColors:true,side:T.BackSide,fog:false}));scene.add(skyM);
+  var stp=new Float32Array(900);for(var i=0;i<300;i++){var u=Math.random()*6.283,v=Math.random()*1.3+.1;stp[i*3]=Math.cos(u)*Math.cos(v)*470;stp[i*3+1]=Math.sin(v)*470;stp[i*3+2]=Math.sin(u)*Math.cos(v)*470}
+  var sgm=new T.BufferGeometry();sgm.setAttribute('position',new T.BufferAttribute(stp,3));var stars=new T.Points(sgm,new T.PointsMaterial({color:0xffffff,size:2.2,transparent:true,opacity:0,fog:false,sizeAttenuation:false}));scene.add(stars);
+
+  var hemi=new T.HemisphereLight(0xfff4e0,0xb08a55,0.75);scene.add(hemi);
+  var sun=new T.DirectionalLight(0xfff0cf,0.95);
+  sun.position.set(40,60,25);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+  var sh=sun.shadow.camera;sh.left=-50;sh.right=50;sh.top=50;sh.bottom=-50;sh.near=10;sh.far=160;sun.shadow.bias=-0.0006;
+  scene.add(sun);
+
+  function M(c){return new T.MeshLambertMaterial({color:c})}
+  function box(p,w,h,d,c,x,y,z){var m=new T.Mesh(new T.BoxGeometry(w,h,d),M(c));m.position.set(x,y,z);m.castShadow=true;p.add(m);return m}
+  function cyl(p,r1,r2,h,c,x,y,z){var m=new T.Mesh(new T.CylinderGeometry(r1,r2,h,14),M(c));m.position.set(x,y,z);m.castShadow=true;p.add(m);return m}
+  function strutXY(p,x1,y1,x2,y2,z,t,c){var m=box(p,Math.hypot(x2-x1,y2-y1),t,t,c,(x1+x2)/2,(y1+y2)/2,z);m.rotation.z=Math.atan2(y2-y1,x2-x1);return m}
+  function strutZY(p,y1,z1,y2,z2,x,t,c){var m=box(p,t,t,Math.hypot(y2-y1,z2-z1),c,x,(y1+y2)/2,(z1+z2)/2);m.rotation.x=-Math.atan2(y2-y1,z2-z1);return m}
+  // إطار أحمر حول إضافات SDP
+  var iotOut=[],redMat=new T.MeshBasicMaterial({color:0xe02424,side:T.BackSide});
+  function iot(m){
+    var g=m.geometry;g.computeBoundingBox();var s=new T.Vector3();g.boundingBox.getSize(s);
+    var o=new T.Mesh(g,redMat);o.scale.set((s.x+0.16)/Math.max(s.x,0.01),(s.y+0.16)/Math.max(s.y,0.01),(s.z+0.16)/Math.max(s.z,0.01));
+    m.add(o);iotOut.push(o);return m;
+  }
+
+  // ===== التضاريس =====
+  function sm(a){a=Math.max(0,Math.min(1,a));return a*a*(3-2*a)}
+  var SX0=-16+3,SZ0=-77;
+  function hgt(x,z){
+    var d=Math.hypot(x,z);
+    var h=Math.abs(Math.sin(x*.035+1.3)*Math.cos(z*.03))*9+Math.sin(x*.11+z*.07)*1.2+Math.sin(z*.23+x*.13)*.35+Math.sin(x*.018)*Math.sin(z*.021)*10;
+    return h*sm((d-40)/45)*sm((Math.hypot(x-SX0,z-SZ0)-32)/16)*sm((Math.hypot(x+56,z-6)-16)/10);
+  }
+  var tg=new T.PlaneGeometry(520,520,170,170);tg.rotateX(-Math.PI/2);
+  var tp=tg.attributes.position,tcol=[],lo=new T.Color(0xc4975a),hi=new T.Color(0xebd29c),rk=new T.Color(0x9a7a52),cc=new T.Color();
+  for(var i=0;i<tp.count;i++){
+    var x=tp.getX(i),z=tp.getZ(i),h=hgt(x,z);tp.setY(i,h);
+    cc.copy(lo).lerp(hi,Math.max(0,Math.min(1,(h+1)/14)));
+    var n=Math.sin(x*.7)*Math.sin(z*.9)*.5+.5;cc.lerp(rk,n*.18);
+    tcol.push(cc.r,cc.g,cc.b);
+  }
+  tg.setAttribute('color',new T.Float32BufferAttribute(tcol,3));tg.computeVertexNormals();
+  var terrain=new T.Mesh(tg,new T.MeshLambertMaterial({vertexColors:true}));terrain.receiveShadow=true;scene.add(terrain);
+
+  // الحقل: نسيج صفوف المحصول ومسارات العجلات
+  var R=33,L=30,TW=[6,12,18,24,30];
+  var cv=document.createElement('canvas');cv.width=cv.height=1024;var cx=cv.getContext('2d'),K=512/R;
+  cx.fillStyle='#6b8f3a';cx.fillRect(0,0,1024,1024);
+  for(var r=3;r<512;r+=5){var g=90+Math.random()*40;cx.strokeStyle='rgb('+(70+g*.2|0)+','+(g+50|0)+','+(40+g*.1|0)+')';cx.lineWidth=3;cx.beginPath();cx.arc(512,512,r,0,6.2832);cx.stroke()}
+  for(var k=0;k<5000;k++){cx.fillStyle='rgba('+(60+Math.random()*40|0)+','+(100+Math.random()*50|0)+',40,.35)';cx.fillRect(Math.random()*1024,Math.random()*1024,3,3)}
+  TW.forEach(function(t){cx.strokeStyle='#8a6a40';cx.lineWidth=7;cx.beginPath();cx.arc(512,512,t*K,0,6.2832);cx.stroke()});
+  var tex=new T.CanvasTexture(cv);tex.anisotropy=4;
+  var field=new T.Mesh(new T.CircleGeometry(R,72),new T.MeshLambertMaterial({map:tex}));
+  field.rotation.x=-Math.PI/2;field.position.y=0.04;field.receiveShadow=true;scene.add(field);
+  // طبقة الرطوبة: 8 قطاعات × 3 حلقات
+  var NS=8,NR=3,cells=[],ovl=new T.Group();scene.add(ovl);
+  for(var r=0;r<NR;r++)for(var s=0;s<NS;s++){
+    var cm=new T.Mesh(new T.RingGeometry(r*11+.1,(r+1)*11-.1,20,1,s*Math.PI/4+.01,Math.PI/4-.02),new T.MeshBasicMaterial({color:0x888888,transparent:true,opacity:.5,side:T.DoubleSide,depthWrite:false}));
+    cm.rotation.x=Math.PI/2;cm.position.y=.08;ovl.add(cm);
+    cells.push({m:22+Math.random()*25,base:1.2+Math.random()*2.6,mat:cm.material});
+  }
+  var cD=new T.Color(0xd9822b),cM=new T.Color(0x3fb56b),cW=new T.Color(0x2a6fdb);
+  function mcol(m,out){var t=Math.max(0,Math.min(1,m/100));if(t<.5)out.copy(cD).lerp(cM,t*2);else out.copy(cM).lerp(cW,(t-.5)*2)}
+  function st(m){return m<30?['جاف',0xe74c3c]:m<45?['منخفض',0xf1c40f]:m<=80?['مثالي',0x2ecc71]:['مشبع',0x3498db]}
+  // صخور متناثرة
+  for(var i=0;i<70;i++){
+    var a=Math.random()*6.283,d=40+Math.random()*150,x=Math.cos(a)*d,z=Math.sin(a)*d;
+    var s=.4+Math.random()*1.6,rk2=new T.Mesh(new T.DodecahedronGeometry(s,0),M(0x8c7352));
+    rk2.position.set(x,hgt(x,z)+s*.3,z);rk2.rotation.set(Math.random()*3,Math.random()*3,0);rk2.scale.y=.6;scene.add(rk2);
+  }
+
+  // ===== المحور التقليدي =====
+  var G=0xccd3d6,GD=0x9aa4a9,center=new T.Group();scene.add(center);
+  var pad=cyl(center,2,2.2,0.3,0xa8a8a2,0,0.15,0);pad.receiveShadow=true;
+  [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(q){
+    var m=box(center,.14,.14,5,G,0,0,0);
+    // أرجل البرج المركزي المائلة
+    var dx=q[0]*1.1,dz=q[1]*1.1,top=new T.Vector3(q[0]*.3,5.4,q[1]*.3),bot=new T.Vector3(dx,.3,dz);
+    var len=top.distanceTo(bot);center.remove(m);
+    var leg=cyl(center,.07,.07,len,G,(top.x+bot.x)/2,(top.y+bot.y)/2,(top.z+bot.z)/2);
+    leg.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),top.clone().sub(bot).normalize());
+  });
+  [1.6,3.2].forEach(function(y){box(center,2.2-y*.25,.08,.08,GD,0,y,1.1-y*.2);box(center,2.2-y*.25,.08,.08,GD,0,y,-1.1+y*.2)});
+  cyl(center,.45,.45,5.6,0xe3e8ea,0,2.9,0);           // الأنبوب الصاعد
+  cyl(center,.62,.62,.7,0x6f7b82,0,5.5,0);            // رأس المحور
+
+  var pivot=new T.Group();scene.add(pivot);
+  var pipe=cyl(pivot,.26,.26,L+2,0xdfe5e8,(L+2)/2+.8,5.4,0);pipe.rotation.z=Math.PI/2;
+  var wheels=[],xs=[1.2].concat(TW);
+  for(var s=0;s<5;s++){
+    var x0=xs[s],x1=xs[s+1],n=Math.round((x1-x0)/1.5),dx=(x1-x0)/n;
+    strutXY(pivot,x0,3.7,x1,3.7,0,.1,GD);               // القضيب السفلي
+    [.35,-.35].forEach(function(z){
+      for(var j=0;j<n;j++){
+        var a=x0+j*dx,b=a+dx;
+        strutXY(pivot,a,j%2?5.2:3.8,b,j%2?3.8:5.2,z,.07,G);
+      }
+    });
+    box(pivot,.07,1.6,.07,G,x1,4.5,.35);box(pivot,.07,1.6,.07,G,x1,4.5,-.35);
+  }
+  strutXY(pivot,L,5.3,L+2,5.3,0,.1,GD);
+  TW.forEach(function(x){
+    // برج على شكل A وعجلات ومحرك
+    strutZY(pivot,4.9,0,.55,1.3,x,.12,G);strutZY(pivot,4.9,0,.55,-1.3,x,.12,G);
+    strutZY(pivot,2.6,1.0,3.3,-1.0,x,.07,GD);
+    box(pivot,.22,.22,2.8,GD,x,.55,0);
+    box(pivot,.7,.45,.7,0x3b6b86,x,.9,0);               // مجموعة المحرك
+    [1.3,-1.3].forEach(function(z){
+      var w=cyl(pivot,.62,.62,.38,0x262626,x,.62,z);w.rotation.x=Math.PI/2;wheels.push(w);
+      var h=cyl(pivot,.25,.25,.42,0x8a8f93,x,.62,z);h.rotation.x=Math.PI/2;
+    });
+  });
+  // الخراطيم والرشاشات
+  for(var x=2;x<=L+1;x+=2.4){
+    cyl(pivot,.025,.025,2.6,0x222222,x,4.1,0);
+    var hd=cyl(pivot,.06,.18,.28,0x2e86c1,x,2.7,0);
+  }
+  var endGun=new T.Mesh(new T.SphereGeometry(.22,10,10),M(0x888888));endGun.position.set(L+2,5.3,0);pivot.add(endGun);
+
+  // ===== إضافات SDP: IoT وطاقة متجددة (بإطار أحمر) =====
+  // محطة الحقل المركزية: خزانة التحكم + لوح شمسي + بطارية + هوائي LoRa
+    iot(box(scene,1.5,1.9,.75,0xe9eef0,2.1,1.2,3.4));
+  iot(cyl(scene,.04,.04,4.2,0x333333,1.4,5.3,3.4));
+  iot(new T.Mesh(new T.SphereGeometry(.14,8,8),M(0x333333))).position.set(1.4,7.4,3.4);
+  scene.children[scene.children.length-1].castShadow=true;
+  // وحدة قياس الضغط على الأنبوب + صندوق على الذراع
+  iot(cyl(pivot,.11,.11,.5,0xb0883a,3,5.0,0));
+  iot(box(pivot,.55,.45,.35,0xe9eef0,L-.4,3.9,.7));
+  var gp=iot(box(pivot,.9,.06,.6,0x1d3557,L-.4,4.3,.7));gp.rotation.z=.25;
+  iot(box(pivot,.3,.25,.25,0xe9eef0,L,5.7,0));
+  var nodes=[];// عقد استشعار التربة في الحقل
+  [[9,.5],[15,2.2],[21,3.6],[26,5.2],[12,4.3],[19,1.2],[28,2.9]].forEach(function(p){
+    var x=Math.cos(p[1])*p[0],z=Math.sin(p[1])*p[0];
+    SMART.push(cyl(scene,.04,.04,1.3,0x555555,x,.65,z));
+    iot(box(scene,.32,.24,.2,0xe9eef0,x,1.35,z));
+    var nlamp=new T.Mesh(new T.SphereGeometry(.11,8,8),new T.MeshBasicMaterial({color:0x2ecc71}));nlamp.position.set(x,1.85,z);scene.add(nlamp);
+    nodes.push({lamp:nlamp,cell:cells[Math.min(2,Math.floor(p[0]/11))*NS+Math.floor(p[1]/(Math.PI/4))]});
+    var sp=iot(box(scene,.4,.03,.3,0x1d3557,x,1.58,z));sp.rotation.x=-.4;
+  });
+  // محطة الأرصاد
+  (function(){
+    var x=38,z=8;
+    cyl(scene,.06,.06,4,0x666666,x,2,z);
+    iot(box(scene,.5,.4,.3,0xe9eef0,x,3.2,z));
+    var sp=iot(box(scene,.7,.04,.5,0x1d3557,x,4.2,z));sp.rotation.x=-.5;
+    iot(cyl(scene,.12,.12,.2,0xdddddd,x,4.7,z));
+  })();
+  // محطة المضخة
+  var pump=new T.Group();pump.position.set(-7,0,-5);scene.add(pump);
+  box(pump,1.6,.9,1,0x3b6b86,0,.45,0);cyl(pump,.38,.38,1.3,0x5a6a72,.2,1.1,0);
+  iot(box(pump,.8,1.1,.4,0xe9eef0,-1.5,1.1,.3));cyl(pump,.04,.04,.6,0x555555,-1.5,.3,.3);
+  var lamp=new T.Mesh(new T.SphereGeometry(.13,8,8),new T.MeshBasicMaterial({color:0xe74c3c}));lamp.position.set(-1.5,1.8,.55);pump.add(lamp);
+  var pdx=6.2,pdz=4.5,pdl=Math.hypot(pdx,pdz),pp=cyl(scene,.2,.2,pdl,0xb7bfc3,-3.1,.3,-2.25);pp.rotation.z=Math.PI/2;pp.rotation.y=-Math.atan2(pdz,pdx);
+
+  // ===== محطة الطاقة خارج الحقل =====
+  var SX=-16,SZ=-77,SY=0,site=new T.Group();site.position.set(SX,SY,SZ);scene.add(site);
+  function pt(x,y,z){return new T.Vector3(SX+x,SY+y,SZ+z)}
+  var pad2=box(site,46,.6,32,0x9d8f78,3,.0,0);pad2.receiveShadow=true;pad2.castShadow=false;
+  var pc=document.createElement('canvas');pc.width=256;pc.height=128;var px=pc.getContext('2d');px.fillStyle='#10264a';px.fillRect(0,0,256,128);px.strokeStyle='rgba(170,195,235,.55)';px.lineWidth=1.5;
+  for(var i=0;i<=12;i++){px.beginPath();px.moveTo(i*256/12,0);px.lineTo(i*256/12,128);px.stroke()}for(var j=0;j<=6;j++){px.beginPath();px.moveTo(0,j*128/6);px.lineTo(256,j*128/6);px.stroke()}
+  var glassM=new T.MeshStandardMaterial({map:new T.CanvasTexture(pc),metalness:.55,roughness:.3});
+  for(var r=0;r<3;r++){
+    var zr=-7+r*4.6;
+    for(var c=0;c<6;c++){
+      var pg2=new T.Group();pg2.position.set(-9+c*3.1,1.9,zr);pg2.rotation.x=.5;site.add(pg2);
+      var fr=box(pg2,3,.08,1.75,0xb9c0c4,0,0,0);var gl=new T.Mesh(new T.PlaneGeometry(2.88,1.63),glassM);gl.rotation.x=-Math.PI/2;gl.position.y=.05;pg2.add(gl);
+      if(c%2==0){box(site,.1,1.7,.1,0x7d868b,-9+c*3.1-1.2,.85,zr+.5);box(site,.1,1.3,.1,0x7d868b,-9+c*3.1-1.2,.65,zr-.5)}
+    }
+    box(site,18.6,.08,.08,0x7d868b,.1,1.9,zr);
+  }
+  function lab(txt,x,y,z){var cv2=document.createElement('canvas');cv2.width=256;cv2.height=64;var g2=cv2.getContext('2d');g2.fillStyle='rgba(20,30,25,.78)';g2.fillRect(0,0,256,64);g2.fillStyle='#fff';g2.font='700 28px Tajawal,sans-serif';g2.textAlign='center';g2.direction='rtl';g2.fillText(txt,128,42);
+    var sp2=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(cv2),depthTest:false,fog:false}));sp2.scale.set(4.2,1.05,1);sp2.position.set(x,y,z);sp2.renderOrder=9;site.add(sp2)}
+  var zE=11;
+  iot(box(site,1.4,1.8,.6,0xe9eef0,-8,.9,zE));lab('منظّم الشحن MPPT',-8,3,zE);
+  var batBars=[];
+  for(var i=0;i<4;i++){var bx=-3+i*1.5;iot(box(site,1.3,2,.9,0x2d5a3d,bx,1,zE));
+    var bg=new T.BoxGeometry(.12,1.6,.04);bg.translate(0,.8,0);var bm=new T.Mesh(bg,new T.MeshBasicMaterial({color:0x2ecc71}));bm.position.set(bx,.2,zE-.47);site.add(bm);batBars.push(bm)}
+  lab('بنك البطاريات',-.75,3.3,zE);
+  iot(box(site,1.5,1.9,.6,0xe9eef0,3.5,.95,zE));lab('العاكس (Inverter)',3.5,3.2,zE);
+  iot(box(site,1.3,1.6,.6,0xdfe5e8,8,.8,zE));lab('محوّل ATS',8,2.9,zE);
+  var aL=[];[-.4,0,.4].forEach(function(dx){var l=new T.Mesh(new T.SphereGeometry(.1,8,8),new T.MeshBasicMaterial({color:0x333333}));l.position.set(8+dx,1.35,zE-.34);site.add(l);aL.push(l)});
+  var lampMPPT=new T.Mesh(new T.SphereGeometry(.1,8,8),new T.MeshBasicMaterial({color:0x2ecc71}));lampMPPT.position.set(-8,1.5,zE-.34);site.add(lampMPPT);
+  // عمود الشبكة والمحوّل وخط التوتر
+  var gx=15,pole0=cyl(site,.18,.22,9,0x6b5338,gx,4.5,zE);
+  box(site,3,.15,.15,0x5a4630,gx,8.4,zE);var tr=cyl(site,.55,.55,1.3,0x7d868b,gx,6.6,zE);
+  [-1.2,0,1.2].forEach(function(dx){cyl(site,.07,.07,.35,0xeeeeee,gx+dx,8.7,zE)});
+  lab('الشبكة العمومية',gx,10.3,zE);
+  var ux=SX,uz=SZ,ul=Math.hypot(ux,uz);ux/=ul;uz/=ul;var gp=[new T.Vector3(SX+gx,SY,SZ+zE)];
+  for(var i=1;i<=3;i++){var wx2=SX+gx+ux*i*30,wz2=SZ+zE+uz*i*30,wy=hgt(wx2,wz2);gp.push(new T.Vector3(wx2,wy,wz2));SMART.push(cyl(scene,.16,.2,9,0x6b5338,wx2,wy+4.5,wz2));var ca=box(scene,.15,.15,3,0x5a4630,wx2,wy+8.4,wz2);SMART.push(ca);ca.rotation.y=-Math.atan2(uz,ux)}
+  for(var i=0;i<3;i++)[-1.2,0,1.2].forEach(function(dz){
+    var a=gp[i],b=gp[i+1],pp2=[];for(var s=0;s<=10;s++){var q=s/10;pp2.push(new T.Vector3(a.x+(b.x-a.x)*q-uz*dz,a.y+8.4+(b.y-a.y)*q-1.1*Math.sin(Math.PI*q),a.z+(b.z-a.z)*q+ux*dz))}
+    var ut=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pp2),24,.03,4),M(0x222222));scene.add(ut);SMART.push(ut)});
+  // سياج
+  for(var i=-22;i<=28;i+=4){[-16,16].forEach(function(z){box(site,.1,1.6,.1,0x888f93,i,.8,z)})}
+  for(var j=-16;j<=16;j+=4){[-22,28].forEach(function(x){box(site,.1,1.6,.1,0x888f93,x,.8,j)})}
+  box(site,50,.05,.05,0x888f93,3,1.4,16);box(site,50,.05,.05,0x888f93,3,1.4,-16);box(site,.05,.05,32,0x888f93,-22,1.4,0);box(site,.05,.05,32,0x888f93,28,1.4,0);
+  // الكوابل
+  var flows=[];
+  function wire(ps,col,flowCol){
+    var cu=new T.CatmullRomCurve3(ps),tb=new T.Mesh(new T.TubeGeometry(cu,40,.07,6),M(col));scene.add(tb);SMART.push(tb);
+    var n=12,arr=new Float32Array(n*3),ph=[];for(var i=0;i<n;i++)ph.push(i/n);
+    var g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(arr,3));
+    var po=new T.Points(g,new T.PointsMaterial({color:flowCol,size:.5,transparent:true,depthTest:false,fog:false}));po.frustumCulled=false;po.renderOrder=8;po.visible=false;scene.add(po);
+    var f={cu:cu,ph:ph,arr:arr,g:g,po:po,n:n,on:false,sp:.2};flows.push(f);return f}
+  var W={};
+  W.pv=wire([pt(-10.5,1.6,4),pt(-10.5,.15,7),pt(-8,.15,9.4),pt(-8,.5,zE-.3)],0xc0392b,0xffd23f);
+  W.chg=wire([pt(-7.5,.5,zE-.3),pt(-6.5,.15,9.1),pt(-3.6,.15,9.1),pt(-3,.5,zE-.45)],0x222222,0xffd23f);
+  W.dir=wire([pt(-7.6,.5,zE-.3),pt(-7,.15,8.3),pt(3.2,.15,8.3),pt(3.3,.5,zE-.3)],0xc0392b,0xffd23f);
+  W.bat=wire([pt(1.5,.5,zE-.45),pt(2,.15,9.5),pt(3,.15,9.5),pt(3.3,.5,zE-.3)],0x222222,0x4cd964);
+  W.inv=wire([pt(3.9,.5,zE-.3),pt(5,.15,9.8),pt(7.6,.15,9.8),pt(7.8,.5,zE-.3)],0x888f93,0xff9f43);
+  W.grid=wire([pt(gx,.4,zE-.3),pt(13,.15,10.1),pt(8.8,.15,10.1),pt(8.4,.5,zE-.3)],0x888f93,0x4aa3ff);
+  var lp=[pt(8,.5,zE-.3)],ax=SX+7,az=SZ+zE-1;for(var s=1;s<=14;s++){var q=s/14,x=ax+(2.1-ax)*q,z=az+(3.4-az)*q;lp.push(new T.Vector3(x,hgt(x,z)+.15,z))}
+  W.load=wire(lp,0x888f93,0xff9f43);
+  [[2.1,.15,3.4,-3,.15,0],[2.1,.15,3.4,-8.5,.15,-4.7]].forEach(function(a){wire([new T.Vector3(a[0],a[1],a[2]),new T.Vector3((a[0]+a[3])/2,.15,(a[2]+a[5])/2),new T.Vector3(a[3],a[4],a[5])],0x888f93,0xff9f43)});
+  for(var s=2;s<=12;s+=3){var q=lp[s];SMART.push(box(scene,.2,.8,.2,0xf1c40f,q.x,q.y+.3,q.z+.4))}
+  // مقياس رياح
+  var anem=new T.Group();anem.position.set(38,5.2,8);scene.add(anem);
+  [0,2.09,4.19].forEach(function(a){var arm=box(anem,.6,.04,.04,0x444444,Math.cos(a)*.3,0,Math.sin(a)*.3);arm.rotation.y=-a;var cup=new T.Mesh(new T.SphereGeometry(.1,8,8),M(0xdddddd));cup.position.set(Math.cos(a)*.6,0,Math.sin(a)*.6);anem.add(cup)});
+  // رذاذ الماء
+  var hx=[];for(var x=2;x<=L+1;x+=2.4)hx.push(x);
+  var NP=hx.length*16,pa=new Float32Array(NP*3),pv=new Float32Array(NP*3),pl=new Float32Array(NP);
+  function rs(i){var a=Math.random()*6.283,s=.8+Math.random()*1.4;pa[i*3]=hx[i%hx.length];pa[i*3+1]=2.65;pa[i*3+2]=0;pv[i*3]=Math.cos(a)*s;pv[i*3+1]=.5+Math.random()*1.1;pv[i*3+2]=Math.sin(a)*s;pl[i]=0}
+  for(var i=0;i<NP;i++){rs(i);pl[i]=-Math.random()*.9}
+  var pg=new T.BufferGeometry();pg.setAttribute('position',new T.BufferAttribute(pa,3));
+  var pts=new T.Points(pg,new T.PointsMaterial({color:0x9fdcff,size:.24,transparent:true,opacity:.85,depthWrite:false}));pts.frustumCulled=false;pts.visible=false;pivot.add(pts);
+  var endObj=new T.Object3D();endObj.position.set(L,2.5,0);pivot.add(endObj);
+
+  // ===== الكاميرا والزوايا =====
+  var o={theta:.8,phi:1,rad:78,tx:0,ty:2,tz:0},goal=null,follow=false;
+  var views=[
+    {n:'عامة',t:.8,p:1,r:78,c:[0,2,0]},
+    {n:'من الأعلى',t:.8,p:.09,r:100,c:[0,0,0]},
+    {n:'البرج المركزي',t:.5,p:1.25,r:14,c:[2,3,2]},
+    {n:'عقدة تربة',t:2.4,p:1.2,r:6,c:[Math.cos(2.2)*15,1,Math.sin(2.2)*15]},
+    {n:'مستوى الأرض',t:2.6,p:1.5,r:46,c:[0,3,0]},
+    {n:'الآبار والخزان',t:-.3,p:1,r:44,c:[-54,1,6]},
+    {n:'المضخة',t:-2.5,p:1.2,r:12,c:[-7,1,-5]},
+    {n:'محطة الطاقة',t:Math.atan2(-(-77),-(-16))+.55,p:1.1,r:46,c:[-16,1.5,-77]},
+    {n:'خط الكوابل',t:Math.atan2(-(-77),-(-16))+1.2,p:.8,r:70,c:[-8,0,-39]},
+    {n:'طرف الذراع',t:1.2,p:1.15,r:12,c:null,f:true}
+  ];
+  var vb=document.getElementById('views');
+  views.forEach(function(v,i){
+    var b=document.createElement('button');b.type='button';b.className='sm'+(i?'':' on');b.textContent=v.n;
+    b.onclick=function(){
+      [].forEach.call(vb.children,function(x){x.classList.remove('on')});b.classList.add('on');
+      goal={t:v.t,p:v.p,r:v.r,c:v.c};follow=!!v.f;
+    };vb.appendChild(b);
+  });
+  var tgt=new T.Vector3();
+  function place(){
+    o.phi=Math.max(.08,Math.min(1.53,o.phi));o.rad=Math.max(3,Math.min(170,o.rad));
+    camera.position.set(o.tx+o.rad*Math.sin(o.phi)*Math.cos(o.theta),o.ty+o.rad*Math.cos(o.phi),o.tz+o.rad*Math.sin(o.phi)*Math.sin(o.theta));
+    camera.lookAt(o.tx,o.ty,o.tz);
+  }
+  var ptrs={},last=0;
+  function pd(){var k=Object.keys(ptrs);if(k.length<2)return 0;var a=ptrs[k[0]],b=ptrs[k[1]];return Math.hypot(a.x-b.x,a.y-b.y)}
+  wrap.addEventListener('pointerdown',function(e){wrap.setPointerCapture(e.pointerId);ptrs[e.pointerId]={x:e.clientX,y:e.clientY};last=pd();goal=null});
+  wrap.addEventListener('pointerup',function(e){delete ptrs[e.pointerId]});
+  wrap.addEventListener('pointercancel',function(e){delete ptrs[e.pointerId]});
+  wrap.addEventListener('pointermove',function(e){
+    var p=ptrs[e.pointerId];if(!p)return;var n=Object.keys(ptrs).length;
+    if(n===1){o.theta-=(e.clientX-p.x)*.006;o.phi-=(e.clientY-p.y)*.006}
+    p.x=e.clientX;p.y=e.clientY;
+    if(n>=2){var d=pd();if(last)o.rad*=last/d;last=d}
+  });
+  wrap.addEventListener('wheel',function(e){e.preventDefault();goal=null;o.rad*=1+e.deltaY*.001},{passive:false});
+  function resize(){var w=innerWidth,h=innerHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix()}
+  addEventListener('resize',resize);resize();
+
+  // ===== التحكم =====
+  var running=true,speed=.4,ang=0,btn=document.getElementById('toggle'),sl=document.getElementById('speed');
+  var stateEl=document.getElementById('state'),angEl=document.getElementById('angle');
+  btn.onclick=function(){running=!running;btn.textContent=running?'إيقاف':'تشغيل';stateEl.textContent=running?'يعمل':'متوقف'};
+  sl.oninput=function(){speed=parseFloat(sl.value)};
+  var rowsEl=document.getElementById('rows'),rowEls=[],lastUI=-999;
+  nodes.forEach(function(n,i){var d=document.createElement('div');d.className='row';d.innerHTML='<span>عقدة '+(i+1)+'</span><b></b><b></b><span class="st"></span>';rowsEl.appendChild(d);rowEls.push(d)});
+  var lb=document.getElementById('layerbtn');
+  lb.onclick=function(){ovl.visible=!ovl.visible;lb.textContent=ovl.visible?'إخفاء طبقة الرطوبة':'إظهار طبقة الرطوبة'};
+  var pumpOn=false,pb=document.getElementById('pumpbtn');
+  var pst=document.getElementById('pstate'),prs=document.getElementById('prs'),flw=document.getElementById('flw');
+  pb.onclick=function(){
+    pumpOn=!pumpOn;pb.textContent=pumpOn?'إيقاف المضخة':'تشغيل المضخة';pst.textContent=pumpOn?'تعمل':'متوقفة';
+    lamp.material.color.setHex(pumpOn?0x2ecc71:0xe74c3c);pts.visible=pumpOn;if(!pumpOn){prs.textContent='0.0 بار';flw.textContent='0 م³/س'}
+  };
+
+  var KC=[[.3,.75,1.15,.4],[.5,.8,1.15,.75],[.4,.8,1.1,.9]];
+  var simH=13,windNow=4.5,storm=false,autoOn=false,tempC=40,et0=0,etc=0,eff=1,lastAuto=0,lastW=0,rhNow=20;
+  function $(i){return document.getElementById(i)}
+  var wxEl=$('wx'),e0El=$('et0'),kcEl=$('kc'),etcEl=$('etc'),decEl=$('dec'),cropSel=$('crop'),stageSel=$('stage'),ab=$('autobtn'),dbn=$('dustbtn');
+  var phaseFault=false,pressFault=false,netDown=false,sdpOn=true,tripped=false,burned=false,wasted=0,lastF=0;
+  function setPump(v){if(v&&(tripped||burned))return;if(pumpOn!==v)pb.onclick()}
+  function setRun(v){if(v&&tripped)return;if(running!==v)btn.onclick()}
+  ab.onclick=function(){
+    autoOn=!autoOn;ab.textContent='الوضع التلقائي: '+(autoOn?'مفعّل':'متوقف');btn.disabled=pb.disabled=autoOn;lastAuto=0;
+    if(!autoOn)decEl.textContent='الوضع اليدوي: أنت تتحكم. فعّل الوضع التلقائي ليقرر النظام.';
+  };
+  dbn.onclick=function(){
+    storm=!storm;dbn.textContent=storm?'إنهاء عاصفة الرياح':'محاكاة عاصفة رياح وغبار';
+    scene.fog.color.set(storm?0xcdb48a:0xe3e6df);scene.fog.near=storm?25:120;scene.fog.far=storm?140:330;
+  };
+  $('panelbtn').onclick=function(){var l=$('left'),rr=$('right');l.style.display=rr.style.display=l.style.display==='none'?'flex':'none';this.textContent=l.style.display==='none'?'إظهار اللوحات':'إخفاء اللوحات'};
+  function clk(){return ('0'+Math.floor(simH)).slice(-2)+':'+('0'+Math.floor(simH%1*60)).slice(-2)}
+  var tcEl=$('toasts');
+  function sms(txt,kind){try{snd.alert(kind)}catch(e){}var d=document.createElement('div');d.className='toast '+(kind||'');d.textContent='['+clk()+'] '+txt;tcEl.appendChild(d);while(tcEl.children.length>3)tcEl.removeChild(tcEl.firstChild);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},9000)}
+  var pbOld=pb.onclick;
+  pb.onclick=function(){if(!pumpOn&&(tripped||burned)){sms('رُفض تشغيل المضخة: العطل قائم'+(burned?' والمضخة محترقة، تحتاج إعادة ضبط':' (وضع الحماية)')+'.','amber');return}pbOld()};
+  var fP=$('fPhase'),fQ=$('fPress'),fN=$('fNet'),swb=$('swbtn'),fR=$('fReset'),linkEl=$('link');
+  fP.onclick=function(){phaseFault=!phaseFault;fP.textContent=phaseFault?'إعادة الطور':'قطع طور كهربائي'};
+  fQ.onclick=function(){pressFault=!pressFault;fQ.textContent=pressFault?'إعادة الضغط':'هبوط ضغط الماء'};
+  fN.onclick=function(){netDown=!netDown;fN.textContent=netDown?'إعادة الإنترنت':'قطع الإنترنت';
+    sms(netDown?'انقطع الإنترنت: الصندوق يواصل الجدولة والحماية محليًا (Offline-First) وتصلك التنبيهات عبر SMS.':'عاد الاتصال: رُفعت قراءات فترة الانقطاع إلى السحابة.',netDown?'amber':'green')};
+  swb.onclick=function(){sdpOn=!sdpOn;swb.textContent=sdpOn?'المفتاح: SDP (الحماية مفعّلة)':'المفتاح: يدوي أصلي (بلا حماية)';if(!sdpOn)tripped=false};
+  fR.onclick=function(){phaseFault=pressFault=netDown=tripped=burned=false;wasted=0;fP.textContent='قطع طور كهربائي';fQ.textContent='هبوط ضغط الماء';fN.textContent='قطع الإنترنت';lamp.material.color.setHex(pumpOn?0x2ecc71:0xe74c3c);pst.textContent=pumpOn?'تعمل':'متوقفة';sms('أُعيد الضبط: زالت الأعطال.','green')};
+  var savedLive=0,lastC=0;
+  function fm(n){return Math.round(n).toLocaleString('en-US')}
+  var cArea=$('cArea'),cCrop=$('cCrop'),cCost=$('cCost'),cSave=$('cSave'),calcEl=$('calc'),svEl=$('sv');
+  function recalc(){
+    var A=Math.max(0,+cArea.value||0),wu=[6500,6000,15000][+cCrop.value],cost=Math.max(0,+cCost.value||0),s=cSave.value/100;
+    var use=A*wu,sm3=use*s,sd=sm3*cost,net=sd-48000,pay=net>0?320000/net*12:0;
+    $('cSaveV').textContent=cSave.value+'%';$('oUse').textContent=fm(use)+' م³';$('oM3').textContent=fm(sm3)+' م³';
+    $('oD').textContent=fm(sd)+' دج';$('oNet').textContent=fm(net)+' دج';
+    $('oPay').textContent=net>0?pay.toFixed(1)+' شهرًا':'لا يُسترد بهذه المدخلات';
+  }
+  [cArea,cCrop,cCost,cSave].forEach(function(e){e.oninput=recalc;e.onchange=recalc});recalc();
+  $('calcbtn').onclick=function(){calcEl.classList.toggle('open')};
+  $('calcx').onclick=function(){calcEl.classList.remove('open')};
+  $('lvReset').onclick=function(){savedLive=0};
+  var soc=62,src='solar',solKW=0,loadKW=0,lastE=0,lastA=0,sunDir=new T.Color(),dayS=new T.Color(0xcfe3ef),nightS=new T.Color(0x070b1c),fogD=new T.Color(0xe3e6df),fogN=new T.Color(0x0c1020),pos0=new T.Vector3();
+  var SRCN={solar:'الشمس تغذي الحمل مباشرة والفائض يشحن البطارية',battery:'البطارية تغذي الحمل (الإنتاج الشمسي غير كافٍ)',grid:'الشبكة العمومية تغذي الحمل (البطارية منخفضة)',none:'لا توجد طاقة: انقطاع'};
+  function energyStep(dt,dl,t){
+    solKW=14*dl*(storm?.45:1)*(1-.65*rainK);loadKW=.5+((pumpOn&&!burned)?11:0)+(running?1.2:0);
+    var k=.13*dt,prevS=src,sur=solKW-loadKW;
+    if(solKW>=loadKW&&solKW>.8)src='solar';else if(soc>20&&!(prevS==='grid'&&soc<40))src='battery';else src=phaseFault?'none':'grid';
+    if(src==='solar')soc=Math.min(100,soc+sur*k);else if(src==='battery')soc=Math.max(0,soc-(loadKW-solKW)*k);else if(src==='grid')soc=Math.min(100,soc+solKW*k);
+    if(src==='none'&&pumpOn)setPump(false);
+    if(src!==prevS)sms('ATS: '+SRCN[src]+'.',src==='none'?'red':src==='grid'?'amber':'green');
+    var on=function(f,v,s){f.on=v;f.sp=s;f.po.visible=v};
+    var sf=Math.min(1,solKW/14)+.25;
+    on(W.pv,solKW>.3,sf);on(W.chg,soc<100&&((src==='solar'&&sur>.2)||(src==='grid'&&solKW>.3)),.25+Math.max(0,sur)/14);
+    on(W.dir,solKW>.3&&src!=='grid'&&!(src==='solar'&&sur>8&&false),.3+Math.min(1,Math.min(solKW,loadKW)/12));
+    on(W.bat,src==='battery',.3+loadKW/14);on(W.inv,src==='solar'||src==='battery',.3+loadKW/14);on(W.grid,src==='grid',.3+loadKW/14);on(W.load,src!=='none',.3+loadKW/14);
+    flows.forEach(function(f){if(!f.on)return;for(var i=0;i<f.n;i++){f.ph[i]=(((f.ph[i]+f.sp*dt*.6)%1)+1)%1;f.cu.getPoint(f.ph[i],pos0);f.arr[i*3]=pos0.x;f.arr[i*3+1]=pos0.y+.12;f.arr[i*3+2]=pos0.z}f.g.attributes.position.needsUpdate=true});
+    aL[0].material.color.setHex(src==='solar'?0xffd23f:0x333333);aL[1].material.color.setHex(src==='battery'?0x4cd964:0x333333);aL[2].material.color.setHex(src==='grid'?0x4aa3ff:0x333333);
+    batBars.forEach(function(b){b.scale.y=Math.max(.02,soc/100);b.material.color.setHSL(soc/100*.33,.9,.5)});
+    // نهار وليل
+    var sa=(simH-6)/12*Math.PI,alt=Math.sin(sa),dd=Math.min(1,dl*1.6);
+    sun.position.set(Math.cos(sa)*70,Math.max(.12,alt)*70+6,25);sun.intensity=.1+.9*dl;hemi.intensity=.2+.55*dl;
+    var sk=.1+.9*Math.min(1,dl*1.4);skyM.material.color.setRGB(sk,sk,sk);scene.background.copy(nightS).lerp(dayS,dd);
+    if(!storm){scene.fog.color.copy(fogN).lerp(fogD,dd)}
+    stars.material.opacity=Math.max(0,1-dl*3)*.9;
+    if(t-lastE>250){lastE=t;$('eSol').textContent=solKW.toFixed(1);$('eLoad').textContent=loadKW.toFixed(1);$('eSoc').textContent=Math.round(soc);
+      var eb=$('eBar');eb.style.width=soc+'%';eb.style.background=soc<20?'#e74c3c':soc<40?'#f1c40f':'#2ecc71';$('eSrc').textContent='المصدر الحالي: '+({solar:'☀ الشمس',battery:'🔋 البطارية',grid:'⚡ الشبكة',none:'✖ لا شيء'})[src]}
+  }
+  // ===== مصادر المياه: آبار + حوض تجميع =====
+  var WX=-54,WZ=6,BR=6.3,BCAP=3000,basin=2400,lowWarn=false,rain=false,rainK=0,timeMode=0,nextBolt=8,bolt=0,lastWU=0,wellOn=true;
+  function lab2(txt,x,y,z){var cv2=document.createElement('canvas');cv2.width=256;cv2.height=64;var g2=cv2.getContext('2d');g2.fillStyle='rgba(20,30,25,.78)';g2.fillRect(0,0,256,64);g2.fillStyle='#fff';g2.font='700 28px Tajawal,sans-serif';g2.textAlign='center';g2.direction='rtl';g2.fillText(txt,128,42);
+    var sp2=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(cv2),depthTest:false,fog:false}));sp2.scale.set(4.2,1.05,1);sp2.position.set(x,y,z);sp2.renderOrder=9;scene.add(sp2);SMART.push(sp2)}
+  function well(x,z,name){var g=new T.Group();g.position.set(x,0,z);scene.add(g);SMART.push(g);
+    box(g,2.4,.3,2.4,0x9a9a92,0,.15,0);cyl(g,.5,.5,1.8,0x5a6a72,0,1.2,0);cyl(g,.7,.7,.2,0x444c50,0,2.15,0);box(g,.7,.9,.5,0x2f6f8f,1.1,.75,.4);
+    iot(box(g,.5,.8,.3,0xe9eef0,-1.1,.7,.5));lab2(name,x,4.4,z)}
+  well(-66,-1,'بئر 1');well(-66,13,'بئر 2');
+  var bw=new T.Mesh(new T.CylinderGeometry(BR+.6,BR+.6,1.8,36,1,true),new T.MeshLambertMaterial({color:0xb9b7aa,side:T.DoubleSide}));bw.position.set(WX,.9,WZ);bw.castShadow=true;scene.add(bw);
+  var bf=new T.Mesh(new T.CylinderGeometry(BR+.6,BR+.6,.2,36),M(0x8c8a80));bf.position.set(WX,.1,WZ);scene.add(bf);
+  var bwater=new T.Mesh(new T.CylinderGeometry(BR,BR,1.5,36),new T.MeshLambertMaterial({color:0x3b8fc4,transparent:true,opacity:.92}));bwater.position.set(WX,.8,WZ);scene.add(bwater);SMART.push(bw,bf,bwater);
+  iot(box(scene,.5,1.6,.5,0xe9eef0,WX+BR+.9,1.1,WZ+2));lab2('حوض التجميع (خزان)',WX,4.6,WZ);
+  var V=function(x,y,z){return new T.Vector3(x,y,z)};
+  function wpipe(ps){var f=wire(ps,0x6c7a80,0x4aa3ff);var tb2=new T.Mesh(new T.TubeGeometry(f.cu,30,.17,8),M(0x7b8a90));scene.add(tb2);SMART.push(tb2);return f}
+  function gw(x,z,dy){return V(x,hgt(x,z)+dy,z)}
+  var sx0=WX+BR+.6,wsp=[];for(var wk=0;wk<=10;wk++){var wq=wk/10;wsp.push(gw(sx0+(-8.4-sx0)*wq,WZ+(-5.3-WZ)*wq,.3))}
+  var pA=wpipe([gw(-66,-1,.3),gw(-64,2,.3),gw(WX-BR-.6,WZ-.5,.4)]),pB=wpipe([gw(-66,13,.3),gw(-64,10,.3),gw(WX-BR-.6,WZ+1,.4)]),pS=wpipe(wsp);
+  SMART.push(site,pump,pp,anem);
+  function setF(f,v){f.on=v;f.sp=.35;f.po.visible=v}
+  var wc=document.createElement('div');wc.className='card wcard';wc.innerHTML='<div class="hd">مصادر المياه</div><div class="lg">بئران ← حوض التجميع ← المضخة ← المحور</div><div class="bat"><i id="wBar"></i></div><div class="src" id="wTxt"></div>';
+  var lf=$('left');lf.insertBefore(wc,lf.firstChild);
+
+  // ===== الأمطار =====
+  var ND=3200,rp=new Float32Array(ND*6),rvv=new Float32Array(ND);
+  for(var i=0;i<ND;i++){rp[i*6]=(Math.random()-.5)*190;rp[i*6+1]=Math.random()*55;rp[i*6+2]=(Math.random()-.5)*190;rvv[i]=38+Math.random()*14}
+  var rg=new T.BufferGeometry();rg.setAttribute('position',new T.BufferAttribute(rp,3));
+  var rainL=new T.LineSegments(rg,new T.LineBasicMaterial({color:0xc4dcea,transparent:true,opacity:.5}));rainL.frustumCulled=false;rainL.visible=false;scene.add(rainL);
+  var clouds=new T.Group();clouds.position.y=58;clouds.visible=false;scene.add(clouds);var cmat=new T.MeshLambertMaterial({color:0x8f989d,transparent:true,opacity:0,fog:false});
+  for(var i=0;i<16;i++){var cp=new T.Mesh(new T.SphereGeometry(1,10,8),cmat),cca=Math.random()*6.283,cr=Math.random()*90;cp.position.set(Math.cos(cca)*cr,Math.random()*5,Math.sin(cca)*cr);cp.scale.set(14+Math.random()*14,4+Math.random()*3,10+Math.random()*10);clouds.add(cp)}
+  var rainFog=new T.Color(),rainBg=new T.Color(0x7d8a92),white=new T.Color(0xffffff);
+
+  // ===== النهار والليل =====
+  function stepClock(dt){if(!timeMode)return (simH+dt*.15)%24;var tg=timeMode===1?10:0,d=((tg-simH+36)%24)-12;return (simH+d*Math.min(1,dt*1.6)+24)%24}
+  var tmb=$('tmbtn'),rb=$('rainbtn'),sb=$('sndbtn'),TML=['الوقت: تلقائي','الوقت: نهار','الوقت: ليل'];
+  tmb.onclick=function(){timeMode=(timeMode+1)%3;tmb.textContent=TML[timeMode]};
+  rb.onclick=function(){rain=!rain;rb.textContent=rain?'إنهاء الأمطار':'محاكاة هطول الأمطار';sms(rain?'بدأ هطول الأمطار: ترتفع رطوبة التربة، ينخفض إنتاج الألواح، ويزداد ماء الحوض.':'توقف المطر.',rain?'amber':'green')};
+  sb.onclick=function(){snd.toggle();sb.textContent=snd.on?'الصوت: يعمل':'الصوت: متوقف'};
+
+  // ===== الصوت (مولَّد برمجيًا عبر Web Audio، بلا ملفات) =====
+  var snd=(function(){var ac=null,nb,m,g={},S={on:false};
+    function chain(type,f,q){var s=ac.createBufferSource();s.buffer=nb;s.loop=true;var fl=ac.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q||.7;var gn=ac.createGain();gn.gain.value=0;s.connect(fl);fl.connect(gn);gn.connect(m);s.start();return gn}
+    function tone(type,f,v){var o=ac.createOscillator();o.type=type;o.frequency.value=f;var gn=ac.createGain();gn.gain.value=0;o.connect(gn);gn.connect(m);o.start();return {o:o,g:gn}}
+    function init(){ac=new (window.AudioContext||window.webkitAudioContext)();m=ac.createGain();m.gain.value=.7;m.connect(ac.destination);
+      nb=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);var d=nb.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+      g.wind=chain('bandpass',420,.5);g.rain=chain('bandpass',3200,.4);g.motor=chain('lowpass',150,.8);g.water=chain('bandpass',900,.6);
+      var p=tone('sawtooth',48);var pf=ac.createBiquadFilter();pf.type='lowpass';pf.frequency.value=320;p.o.disconnect();p.o.connect(pf);pf.connect(p.g);g.pump=p.g;
+      var c=tone('sine',4300),am=ac.createGain();am.gain.value=.5;c.o.disconnect();c.o.connect(am);am.connect(c.g);var lf=ac.createOscillator();lf.frequency.value=17;var lg=ac.createGain();lg.gain.value=.5;lf.connect(lg);lg.connect(am.gain);lf.start();g.cric=c.g}
+    S.toggle=function(){if(!ac)init();if(ac.state==='suspended')ac.resume();S.on=!S.on;m.gain.setTargetAtTime(S.on?.7:0,ac.currentTime,.1)};
+    S.update=function(st){if(!S.on)return;var t0=ac.currentTime;function sg(n,v){n.gain.setTargetAtTime(v,t0,.4)}
+      sg(g.wind,.015+.05*Math.min(1,st.wind/12)+(st.storm?.08:0));sg(g.rain,st.rain*.2);sg(g.motor,st.run?.06:0);sg(g.pump,st.pump?.05:0);sg(g.water,(st.pump?.05:0)+(st.well?.025:0));sg(g.cric,st.night*(1-st.rain)*.012)};
+    S.thunder=function(delay){if(!S.on)return;var s=ac.createBufferSource();s.buffer=nb;var f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=260;var gn=ac.createGain(),t0=ac.currentTime+(delay||.6);
+      gn.gain.setValueAtTime(0,t0);gn.gain.linearRampToValueAtTime(.9,t0+.08);gn.gain.exponentialRampToValueAtTime(.001,t0+2.8);s.connect(f);f.connect(gn);gn.connect(m);s.start(t0);s.stop(t0+3)};
+    S.alert=function(kind){if(!S.on)return;var seq=kind==='red'?[[880,0],[660,.18],[880,.36]]:kind==='amber'?[[660,0],[560,.16]]:[[523,0],[784,.12]],t0=ac.currentTime;
+      seq.forEach(function(q){var o=ac.createOscillator(),gn=ac.createGain();o.type=kind==='red'?'square':'sine';o.frequency.value=q[0];gn.gain.setValueAtTime(0,t0+q[1]);gn.gain.linearRampToValueAtTime(.07,t0+q[1]+.02);gn.gain.exponentialRampToValueAtTime(.001,t0+q[1]+.15);o.connect(gn);gn.connect(m);o.start(t0+q[1]);o.stop(t0+q[1]+.17)})};
+    var mus=null;
+    S.music=function(on){if(!ac)init();if(ac.state==='suspended')ac.resume();
+      if(!on){if(!mus)return;var q=mus;mus=null;clearInterval(q.tm);q.g.gain.setTargetAtTime(0,ac.currentTime,.8);setTimeout(function(){try{q.g.disconnect()}catch(e){}},4500);return}
+      if(mus)return;var q={g:ac.createGain(),step:0,bus:ac.createGain()};mus=q;q.g.gain.value=0;q.g.connect(ac.destination);
+      var cv=ac.createConvolver(),ir=ac.createBuffer(2,ac.sampleRate*3,ac.sampleRate);for(var c=0;c<2;c++){var d=ir.getChannelData(c);for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2.5)}
+      cv.buffer=ir;var wet=ac.createGain();wet.gain.value=.6;cv.connect(wet);wet.connect(q.g);q.bus.connect(q.g);q.bus.connect(cv);q.g.gain.setTargetAtTime(.55,ac.currentTime,1.6);
+      var CH=[[220,261.63,329.63,440],[174.61,220,261.63,349.23],[130.81,196,261.63,329.63],[196,246.94,293.66,392]];
+      function bar(){var t0=ac.currentTime+.1,ch=CH[q.step++%4];
+        ch.forEach(function(f){[-3,3].forEach(function(dt){var o=ac.createOscillator(),fl=ac.createBiquadFilter(),gn=ac.createGain();o.type='triangle';o.frequency.value=f;o.detune.value=dt;fl.type='lowpass';fl.frequency.value=1100;
+          gn.gain.setValueAtTime(0,t0);gn.gain.linearRampToValueAtTime(.035,t0+2.4);gn.gain.linearRampToValueAtTime(.03,t0+6);gn.gain.linearRampToValueAtTime(0,t0+8.6);o.connect(fl);fl.connect(gn);gn.connect(q.bus);o.start(t0);o.stop(t0+8.7)})});
+        var b=ac.createOscillator(),bg=ac.createGain();b.type='sine';b.frequency.value=ch[0]/2;bg.gain.setValueAtTime(0,t0);bg.gain.linearRampToValueAtTime(.12,t0+1.5);bg.gain.linearRampToValueAtTime(0,t0+8.4);b.connect(bg);bg.connect(q.bus);b.start(t0);b.stop(t0+8.5);
+        for(var n=0;n<8;n++){var f2=ch[(n*3+q.step)%4]*(n%2?2:1),tn=t0+n*1+.5,o2=ac.createOscillator(),g2=ac.createGain();o2.type='sine';o2.frequency.value=f2*(n%3===0?2:1);
+          g2.gain.setValueAtTime(0,tn);g2.gain.linearRampToValueAtTime(.07,tn+.015);g2.gain.exponentialRampToValueAtTime(.001,tn+1.9);o2.connect(g2);g2.connect(q.bus);o2.start(tn);o2.stop(tn+2)}}
+      bar();q.tm=setInterval(bar,8000)};
+    S.step=function(v){if(!S.on)return;var s=ac.createBufferSource();s.buffer=nb;var f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=650+Math.random()*350;var gn=ac.createGain(),t0=ac.currentTime;
+      gn.gain.setValueAtTime(0,t0);gn.gain.linearRampToValueAtTime(.32*(v||1),t0+.01);gn.gain.exponentialRampToValueAtTime(.001,t0+.17);s.connect(f);f.connect(gn);gn.connect(m);s.start(t0,Math.random()*1.5,.2)};
+    return S})();
+
+  // ===== وضعان: تقليدي / ذكي =====
+  var conv=false,used=0,over=0,lastMC=0,CSS=document.createElement('style');
+  CSS.textContent='#modes{position:fixed;top:calc(env(safe-area-inset-top,0px) + 52px);left:50%;transform:translateX(-50%);z-index:9990;display:flex;gap:4px;padding:5px;border-radius:100px;background:rgba(7,80,63,.94);direction:rtl}'+
+  '#modes button{all:unset;cursor:pointer;padding:7px 16px;border-radius:100px;color:#fff;font:500 .85rem Tajawal,system-ui,sans-serif;white-space:nowrap}#modes button.on{background:#fff;color:#212529}#modes #cinebtn{background:#e8fe85;color:#212529;margin-inline-start:6px}'+
+  '.cbar{position:fixed;left:0;right:0;height:0;background:#000;z-index:9995;transition:height 1.2s cubic-bezier(.2,.8,.2,1);pointer-events:none}body.cine .cbar{height:11vh}'+
+  '#ccap{position:fixed;bottom:15vh;left:0;right:0;text-align:center;z-index:9996;color:#fff;font:500 clamp(1.3rem,3.2vw,2.4rem) Tajawal,sans-serif;opacity:0;pointer-events:none;text-shadow:0 2px 18px rgba(0,0,0,.7);direction:rtl}#ccap.show{animation:ccap 7s forwards}@keyframes ccap{0%{opacity:0;transform:translateY(14px)}12%,82%{opacity:1;transform:none}100%{opacity:0}}'+
+  '#cfade{position:fixed;inset:0;background:#000;opacity:0;z-index:9994;pointer-events:none}#cprog{position:fixed;bottom:0;left:0;height:3px;background:#e8fe85;z-index:9997;width:0;display:none}body.cine #cprog{display:block}'+
+  '#cskip{display:none;position:fixed;top:calc(11vh + 12px);left:14px;z-index:9997;cursor:pointer;color:#fff;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.5);border-radius:100px;padding:6px 18px;font:500 .85rem Tajawal,sans-serif}body.cine #cskip{display:block}'+
+  'body.cine .card,body.cine .toasts,body.cine #modes,body.cine #simnav,body.cine .left,body.cine .right,body.cine .bar{display:none!important}'+
+  'body.conv .sens,body.conv .brain,body.conv .en,body.conv .adv,body.conv .wcard,body.conv #autobtn,body.conv #swbtn{display:none!important}';
+  document.head.appendChild(CSS);
+  var mb=document.createElement('div');mb.id='modes';mb.innerHTML='<button data-m="0" class="on">وضع SDP الذكي</button><button data-m="1">الري المحوري التقليدي</button><button id="cinebtn">▶ فيديو المحاكاة</button><button id="fpsbtn">🚶 جولة بمنظور الشخص الأول</button>';document.body.appendChild(mb);
+  var mc=document.createElement('div');mc.className='card';mc.innerHTML='<div class="hd" id="mcT"></div><div class="lg" id="mcD"></div><div class="src" id="mcN"></div>';lf.insertBefore(mc,lf.firstChild);
+  function updMC(t){if(t-lastMC<300)return;lastMC=t;$('mcT').textContent=conv?'الوضع: ري محوري تقليدي':'الوضع: SDP الذكي';
+    $('mcD').textContent=conv?'بلا حساسات ولا طاقة شمسية ولا ضخ ذكي ولا حماية ولا ذكاء اصطناعي: يعمل بجدول ثابت.':'حساسات LoRa + طاقة شمسية + ضخ ذكي + حماية + قرار آلي (ET0×Kc).';
+    $('mcN').textContent='ماء مصروف: '+Math.round(used).toLocaleString('en-US')+' م³'+(conv?' · مهدور بالإفراط: '+Math.round(over).toLocaleString('en-US')+' م³':' · هدر الإفراط: 0 م³')}
+  function setMode(c){conv=c;SMART.forEach(function(o){o.visible=!c});iotOut.forEach(function(o){if(o.parent)o.parent.visible=!c});nodes.forEach(function(n){n.lamp.visible=!c});
+    document.body.classList.toggle('conv',c);[].forEach.call(mb.querySelectorAll('button[data-m]'),function(b){b.classList.toggle('on',(+b.dataset.m===1)===c)});
+    used=over=0;phaseFault=pressFault=false;burned=false;tripped=false;
+    if(c){if(autoOn)ab.onclick();sdpOn=false;swb.textContent='المفتاح: يدوي أصلي (بلا حماية)';setRun(true);setPump(true);sms('الوضع التقليدي: محور بلا حساسات أو طاقة شمسية أو حماية، يرشّ بجدول ثابت مهما كانت رطوبة التربة.','amber')}
+    else{sdpOn=true;swb.textContent='المفتاح: SDP (الحماية مفعّلة)';if(!autoOn)ab.onclick();sms('وضع SDP الذكي: حساسات وطاقة شمسية وحماية وقرار آلي.','green')}}
+  [].forEach.call(mb.querySelectorAll('button[data-m]'),function(b){b.onclick=function(){if(cine.on)return;setMode(+b.dataset.m===1)}});
+
+  // ===== فيديو المحاكاة (كاميرا سينمائية) =====
+  var cine={on:false,t:0,i:-1,sv:null};
+  ['cbar','cbar'].forEach(function(c,i){var e=document.createElement('div');e.className=c;e.style[i?'bottom':'top']='0';document.body.appendChild(e)});
+  var ccp=document.createElement('div');ccp.id='ccap';var cfd=document.createElement('div');cfd.id='cfade';var cpg=document.createElement('div');cpg.id='cprog';var skip=document.createElement('div');skip.id='cskip';skip.textContent='تخطي ✕';
+  [ccp,cfd,cpg,skip].forEach(function(e){document.body.appendChild(e)});
+  function mix(a,b,u){return a+(b-a)*u}function es(u){return u*u*(3-2*u)}
+  var SH=[
+    {d:9,ccp:'Smart Desert Pivot — ري ذكي لصحراء الجنوب',f:function(u){var e=es(u);return [mix(110,64,e),mix(85,34,e),mix(110,70,e),0,0,0]}},
+    {d:9,ccp:'حلقة الري: ماء يُوزَّع بدقة على كل قطاع',f:function(u){var a=mix(.3,1.9,u),r=mix(64,46,u);return [Math.cos(a)*r,mix(22,12,u),Math.sin(a)*r,0,3,0]}},
+    {d:8,ccp:'الرش المائي على امتداد الذراع',f:function(u){pivot.updateMatrixWorld(true);endObj.getWorldPosition(tgt);var a=mix(.5,1.7,u);return [tgt.x+13*Math.cos(a),tgt.y+3.5,tgt.z+13*Math.sin(a),tgt.x,tgt.y-1,tgt.z]}},
+    {d:8,ccp:'محطة الطاقة الشمسية: ألواح وبطارية ومحوّل ATS',f:function(u){var e=es(u);return [mix(12,-42,e),mix(17,9,e),mix(-46,-58,e),-13,2,-71]}},
+    {d:8,ccp:'الآبار وحوض التجميع خارج الحقل',f:function(u){var a=mix(-.7,.9,u);return [-54+Math.cos(a)*36,mix(17,9,u),6+Math.sin(a)*36,-56,1,6]}},
+    {d:7,ccp:'صندوق SDP: قياس، قرار، تنفيذ',f:function(u){var e=es(u);return [mix(6,-1,e),mix(7,3.6,e),mix(-15,-3,e),mix(-7,0,e),mix(1,4,e),mix(-5,0,e)]}},
+    {d:11,ccp:'SDP — ذكي، موفِّر، يعمل ليلًا ونهارًا',tm:2,f:function(u){var e=es(u);return [mix(34,100,e),mix(5,64,e),mix(30,72,e),0,mix(2,0,e),0]}}
+  ],TOTAL=SH.reduce(function(a,b){return a+b.d},0);
+  function startCine(){if(cine.on)return;if(fps.on)endFPS();cine.on=true;cine.t=0;cine.i=-1;cine.sv={tm:timeMode,conv:conv,auto:autoOn,sp:speed,rain:rain};
+    if(conv)setMode(false);if(autoOn)ab.onclick();rain=false;rb.textContent='محاكاة هطول الأمطار';timeMode=1;tmb.textContent=TML[1];simH=10;basin=BCAP*.8;
+    speed=.8;sl.value=.8;setRun(true);setPump(true);document.body.classList.add('cine');snd.music(true)}
+  function endCine(){if(!cine.on)return;cine.on=false;document.body.classList.remove('cine');cfd.style.opacity=0;ccp.className='';snd.music(false);
+    timeMode=cine.sv.tm;tmb.textContent=TML[timeMode];speed=cine.sv.sp;sl.value=speed;if(cine.sv.conv)setMode(true);else if(cine.sv.auto&&!autoOn)ab.onclick()}
+  function cineStep(dt){cine.t+=dt;var tt=cine.t;if(tt>=TOTAL){endCine();return}
+    var i=0,acc=0;while(i<SH.length-1&&tt>=acc+SH[i].d){acc+=SH[i].d;i++}var sh=SH[i],u=Math.min(1,(tt-acc)/sh.d);
+    if(i!==cine.i){cine.i=i;ccp.textContent=sh.ccp;ccp.className='';void ccp.offsetWidth;ccp.className='show';if(sh.tm!=null){timeMode=sh.tm;tmb.textContent=TML[timeMode]}}
+    var p=sh.f(u);camera.position.set(p[0],p[1],p[2]);camera.lookAt(p[3],p[4],p[5]);
+    var l=tt-acc,fo=Math.max(l<.7?1-l/.7:0,(sh.d-l)<.6?1-(sh.d-l)/.6:0);if(i===SH.length-1&&sh.d-l<.6)fo=1-(sh.d-l)/.6;cfd.style.opacity=fo;cpg.style.width=(tt/TOTAL*100)+'%'}
+  $('cinebtn').onclick=startCine;skip.onclick=endCine;addEventListener('keydown',function(e){if(e.key==='Escape')endCine()});
+
+  // ===== جولة بمنظور الشخص الأول (طول العين 1.8 م) =====
+  var fps={on:false,x:14,z:16,y:0,vy:0,yaw:0,pitch:0,k:{},mv:[0,0],jump:false,dist:0,zt:0,sv:null,touch:false};
+  var FC=[[0,0,1.7],[-7,-5,1.4],[WX,WZ,BR+.9],[-66,-1,1.6],[-66,13,1.6]];
+  CSS.textContent+='#fpsbtn{border:1px solid rgba(255,255,255,.7)!important}body.fps .card,body.fps .left,body.fps .right,body.fps .bar,body.fps #simnav,body.fps #modes{display:none!important}'+
+   '#fpsH{display:none;position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:9990;color:#fff;background:rgba(7,40,32,.72);padding:8px 18px;border-radius:100px;font:400 .82rem Tajawal,sans-serif;direction:rtl;pointer-events:none;white-space:nowrap}'+
+   '#fpsZ{display:none;position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9990;color:#212529;background:#e8fe85;padding:5px 18px;border-radius:100px;font:500 .9rem Tajawal,sans-serif;direction:rtl;pointer-events:none}'+
+   '#fpsX{display:none;position:fixed;top:12px;left:14px;z-index:9991;cursor:pointer;color:#fff;background:rgba(7,80,63,.9);border-radius:100px;padding:7px 18px;font:500 .85rem Tajawal,sans-serif}'+
+   '#fpsC{display:none;position:fixed;top:50%;left:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:rgba(255,255,255,.85);z-index:9990;pointer-events:none}#fpsJ{display:none;position:fixed;bottom:60px;right:22px;z-index:9991;width:64px;height:64px;border-radius:50%;background:rgba(232,254,133,.85);color:#212529;font:600 .8rem Tajawal,sans-serif;align-items:center;justify-content:center}'+
+   'body.fps #fpsH,body.fps #fpsZ,body.fps #fpsX,body.fps #fpsC{display:block}@media(pointer:coarse){body.fps #fpsJ{display:flex}#fpsH{display:none!important}}';
+  var fH=document.createElement('div');fH.id='fpsH';fH.textContent='W A S D حركة · Shift ركض · Space قفز · الفأرة للنظر · T الوقت · R المطر · M الصوت · Esc خروج';
+  var fZ=document.createElement('div');fZ.id='fpsZ';var fX=document.createElement('div');fX.id='fpsX';fX.textContent='خروج ✕';var fC=document.createElement('div');fC.id='fpsC';var fJ=document.createElement('div');fJ.id='fpsJ';fJ.textContent='قفز';
+  [fH,fZ,fX,fC,fJ].forEach(function(e){document.body.appendChild(e)});
+  function blocked(x,z){
+    FC.forEach(function(c){var dx=x-c[0],dz=z-c[1],d=Math.hypot(dx,dz),r=c[2]+.35;if(d<r&&d>.001){x=c[0]+dx/d*r;z=c[1]+dz/d*r}});
+    var sx=site.position.x,sz=site.position.z+zE,bx0=sx-9.6,bx1=sx+9.6,bz0=sz-1.3,bz1=sz+1.3;
+    if(x>bx0-.35&&x<bx1+.35&&z>bz0-.35&&z<bz1+.35){var a=x-(bx0-.35),b=(bx1+.35)-x,c2=z-(bz0-.35),d2=(bz1+.35)-z,m=Math.min(a,b,c2,d2);if(m===a)x=bx0-.35;else if(m===b)x=bx1+.35;else if(m===c2)z=bz0-.35;else z=bz1+.35}
+    return [x,z]}
+  function zone(){var x=fps.x,z=fps.z;if(Math.hypot(x+7,z+5)<7)return 'محطة الضخ وصندوق SDP';if(Math.hypot(x-WX,z-WZ)<16||Math.hypot(x+66,z-6)<16)return 'الآبار وحوض التجميع';
+    if(Math.hypot(x-site.position.x,z-site.position.z)<28)return 'محطة الطاقة الشمسية';if(Math.hypot(x,z)<33)return 'داخل الحقل المروي';return 'الصحراء المحيطة'}
+  function startFPS(){if(fps.on||cine.on)return;fps.on=true;fps.x=14;fps.z=16;fps.y=hgt(14,16);fps.vy=0;fps.yaw=Math.atan2(14,16);fps.pitch=-.05;fps.k={};fps.mv=[0,0];fps.dist=0;
+    fps.sv={fov:camera.fov,near:camera.near};camera.fov=72;camera.near=.1;camera.rotation.order='YXZ';camera.updateProjectionMatrix();document.body.classList.add('fps');
+    var rd=renderer.domElement;try{rd.requestPointerLock&&rd.requestPointerLock()}catch(e){}}
+  function endFPS(){if(!fps.on)return;fps.on=false;document.body.classList.remove('fps');camera.fov=fps.sv.fov;camera.near=fps.sv.near;camera.updateProjectionMatrix();try{if(document.pointerLockElement)document.exitPointerLock()}catch(e){}}
+  function fpsStep(dt){var f=fps,k=f.k,sp=(k.shiftleft||k.shiftright)?7.2:4;
+    var fw=((k.keyw||k.arrowup)?1:0)-((k.keys||k.arrowdown)?1:0)-f.mv[1],rt=((k.keyd||k.arrowright)?1:0)-((k.keya||k.arrowleft)?1:0)+f.mv[0],ln=Math.hypot(fw,rt);if(ln>1){fw/=ln;rt/=ln}
+    var sy=Math.sin(f.yaw),cy=Math.cos(f.yaw),vx=(-sy*fw+cy*rt)*sp,vz=(-cy*fw-sy*rt)*sp,nx=f.x+vx*dt,nz=f.z+vz*dt,r=Math.hypot(nx,nz);if(r>150){nx*=150/r;nz*=150/r}
+    var b=blocked(nx,nz);nx=b[0];nz=b[1];var moved=Math.hypot(nx-f.x,nz-f.z);f.x=nx;f.z=nz;
+    var gy=hgt(f.x,f.z),ground=f.y<=gy+.02;if(ground&&(k.space||f.jump)){f.vy=5.6;ground=false}f.jump=false;
+    f.vy-=14*dt;f.y+=f.vy*dt;if(f.y<=gy){if(f.vy<-3.5)snd.step(1.5);f.y=gy;f.vy=0;ground=true}
+    if(ground&&moved>0){f.dist+=moved;if(f.dist>(sp>5?2.1:1.6)){f.dist=0;snd.step(1)}}
+    var bob=ground?Math.sin(performance.now()/1000*(sp>5?12:8))*.035*Math.min(1,moved/(sp*dt||1)):0;
+    camera.position.set(f.x,f.y+1.8+bob,f.z);camera.rotation.set(f.pitch,f.yaw,0,'YXZ');
+    f.zt-=dt;if(f.zt<0){f.zt=.3;fZ.textContent=zone()}}
+  $('fpsbtn').onclick=startFPS;fX.onclick=endFPS;
+  fJ.addEventListener('touchstart',function(e){fps.jump=true;e.preventDefault()},{passive:false});
+  addEventListener('keydown',function(e){if(!fps.on)return;var c=e.code.toLowerCase();fps.k[c]=true;if(c==='space'||c.indexOf('arrow')===0)e.preventDefault();
+    if(!e.repeat){if(c==='keyt')tmb.onclick();else if(c==='keyr')rb.onclick();else if(c==='keym')sb.onclick()}});
+  addEventListener('keyup',function(e){fps.k[e.code.toLowerCase()]=false});
+  addEventListener('mousemove',function(e){if(!fps.on)return;if(document.pointerLockElement===renderer.domElement||(e.buttons&1)){fps.yaw-=e.movementX*.0023;fps.pitch=Math.max(-1.45,Math.min(1.45,fps.pitch-e.movementY*.0023))}});
+  document.addEventListener('pointerlockchange',function(){if(fps.on&&!document.pointerLockElement&&!fps.touch&&fps.locked)endFPS();fps.locked=!!document.pointerLockElement});
+  var tch={};addEventListener('touchstart',function(e){if(!fps.on)return;fps.touch=true;[].forEach.call(e.changedTouches,function(t){tch[t.identifier]={x:t.clientX,y:t.clientY,lx:t.clientX,ly:t.clientY,m:t.clientX<innerWidth/2}})},{passive:true});
+  addEventListener('touchmove',function(e){if(!fps.on)return;[].forEach.call(e.changedTouches,function(t){var o=tch[t.identifier];if(!o)return;if(o.m){fps.mv=[Math.max(-1,Math.min(1,(t.clientX-o.x)/55)),Math.max(-1,Math.min(1,(t.clientY-o.y)/55))]}
+    else{fps.yaw-=(t.clientX-o.lx)*.005;fps.pitch=Math.max(-1.45,Math.min(1.45,fps.pitch-(t.clientY-o.ly)*.005));o.lx=t.clientX;o.ly=t.clientY}})},{passive:true});
+  addEventListener('touchend',function(e){[].forEach.call(e.changedTouches,function(t){var o=tch[t.identifier];if(o&&o.m)fps.mv=[0,0];delete tch[t.identifier]})},{passive:true});
+
+  function extras(dt,t,dl){
+    rainK+=((rain?1:0)-rainK)*Math.min(1,dt*.9);var wet=rainK>.01;rainL.visible=clouds.visible=wet;
+    if(wet){
+      cmat.opacity=rainK*.85;clouds.position.x=(t/1000*1.2)%40-20;
+      for(var i=0;i<ND;i++){var k=i*6,y=rp[k+1]-rvv[i]*dt;if(y<0){y+=55;rp[k]=(Math.random()-.5)*190;rp[k+2]=(Math.random()-.5)*190}rp[k+1]=y;rp[k+3]=rp[k]+.5;rp[k+4]=y+1.4;rp[k+5]=rp[k+2]}
+      rg.attributes.position.needsUpdate=true;
+      sun.intensity*=1-.65*rainK;hemi.intensity*=1-.3*rainK;skyM.material.color.multiplyScalar(1-.4*rainK);
+      var gq=.3+.45*dl;rainFog.setRGB(gq*.9,gq,gq*1.03);if(!storm){scene.fog.color.lerp(rainFog,rainK);scene.fog.near=120-95*rainK;scene.fog.far=330-150*rainK}
+      scene.background.lerp(rainBg,.5*rainK*dl+.0);
+      nextBolt-=dt;if(nextBolt<0&&rainK>.8){nextBolt=7+Math.random()*9;bolt=.2;snd.thunder(.5+Math.random())}
+    }else if(!storm){scene.fog.near=120;scene.fog.far=330}
+    if(bolt>0){bolt-=dt;hemi.intensity+=2.2*(bolt>.1?1:.4);scene.background.lerp(white,.3)}
+    // الماء: الآبار تملأ الحوض، والمضخة تسحب منه
+    if(conv)wellOn=false;else{wellOn=basin<BCAP-1&&!pressFault;if(wellOn)basin+=9*dt;if(rain)basin+=10*rainK*dt;if(pumpOn&&!burned)basin-=22.5*dt}
+    basin=Math.max(0,Math.min(BCAP,basin));var lv=basin/BCAP;
+    if(basin<=0&&pumpOn){setPump(false);sms('نضوب الحوض: توقفت المضخة لعدم توفر الماء، وتعمل الآبار على إعادة ملئه.','red')}
+    if(lv<.15&&!lowWarn){lowWarn=true;sms('تنبيه: مستوى الحوض أقل من 15%.','amber')}if(lv>.3)lowWarn=false;
+    bwater.scale.y=Math.max(.04,lv);bwater.position.y=.2+.75*Math.max(.04,lv);
+    setF(pA,wellOn);setF(pB,wellOn);setF(pS,pumpOn&&!burned&&basin>0);if(conv)flows.forEach(function(f){f.po.visible=false});var cuse=(pumpOn&&!burned)?22.5*dt:0;used+=cuse;if(conv&&avgSoil()>72)over+=cuse;
+    if(t-lastWU>300){lastWU=t;var wb=$('wBar');wb.style.width=(lv*100)+'%';wb.style.background=lv<.15?'#e74c3c':lv<.35?'#f1c40f':'#4aa3ff';
+      $('wTxt').textContent='الحوض: '+Math.round(basin).toLocaleString('en-US')+' م³ من '+BCAP.toLocaleString('en-US')+' ('+Math.round(lv*100)+'%) · '+(wellOn?'الآبار تضخ إلى الحوض':'الآبار متوقفة')+(rain?' · ماء مطر +':'')}
+    updMC(t);
+    snd.update({wind:windNow,storm:storm,rain:rainK,pump:pumpOn&&!burned,run:running,night:1-dl,well:wellOn});
+  }
+
+  var ADV=$('aTip'),ANS=$('aAns');
+  function trigNow(){return Math.min(55,32+etc*2.5)}
+  function avgSoil(){var s=0;cells.forEach(function(c){s+=c.m});return s/cells.length}
+  function advise(){
+    var a=avgSoil(),tr=trigNow(),hot=simH>=12&&simH<16,L=[];
+    if(phaseFault)L.push(['w','انقطع طور كهربائي: لا تشغّل المضخة قبل فحص الطور. الحماية تفصلها تلقائيًا.']);
+    if(pressFault)L.push(['w','ضغط الماء منخفض: افحص الأنبوب والبئر قبل أي ري.']);
+    if(windNow>8.5)L.push(['w','الرياح '+windNow.toFixed(0)+' م/ث فوق الحد الآمن: أجّل الرش حتى تهدأ (احتمال هدر وغبار).']);
+    if(src==='grid')L.push(['a','المنظومة على الشبكة والبطارية '+Math.round(soc)+'%: اجعل الري وقت ذروة الشمس (10–15) لتوفير الكهرباء.']);
+    if(soc<25&&src!=='grid')L.push(['a','البطارية منخفضة ('+Math.round(soc)+'%): سيتحول ATS إلى الشبكة قريبًا.']);
+    if(a<tr){L.push(hot?['a','التربة جافة ('+Math.round(a)+'%) لكن الوقت ذروة حرارة: ابدأ الري بعد 16:00 لتقليل التبخر.']:['w','الرطوبة '+Math.round(a)+'% دون العتبة '+Math.round(tr)+'%: ابدأ الري الآن.'])}
+    else if(solKW>loadKW+4&&!pumpOn&&a<tr+12)L.push(['','فائض شمسي '+(solKW-loadKW).toFixed(0)+' kW: وقت اقتصادي لري تكميلي.']);
+    if(!L.length)L.push(['','كل شيء مستقر: رطوبة '+Math.round(a)+'% وطاقة '+({solar:'شمسية',battery:'من البطارية',grid:'من الشبكة',none:'—'})[src]+'.']);
+    ADV.innerHTML='';L.slice(0,3).forEach(function(x){var d=document.createElement('div');d.className=x[0];d.textContent=x[1];ADV.appendChild(d)});
+  }
+  function ans(q){
+    var a=avgSoil(),tr=trigNow(),h=simH,t;
+    if(q==='irr'){var ok=windNow<=8.5;t='ETc الآن '+etc.toFixed(1)+' مم/يوم، والرطوبة '+Math.round(a)+'% (العتبة '+Math.round(tr)+'%). '+(!ok?'الرياح عالية: انتظر هدوءها. ':a>=tr?'لا حاجة للري الآن. ':(h>=12&&h<16)?'الأفضل بعد 16:00. ':'ابدأ الآن، فالوقت مناسب. ')+'الأنسب عادة الصباح الباكر أو المساء لتقليل التبخر.'}
+    else if(q==='pow'){var net=loadKW-solKW,hh=net>0?Math.max(0,(soc-20)/100*40/net):0;t='شمس '+solKW.toFixed(1)+' kW، حمل '+loadKW.toFixed(1)+' kW، بطارية '+Math.round(soc)+'%. '+(net>0?'بالحمل الحالي تكفي البطارية نحو '+hh.toFixed(1)+' ساعة قبل التحويل للشبكة.':'الإنتاج يغطي الحمل والفائض يشحن البطارية.')}
+    else if(q==='wx'){var d=new Date(),doy=Math.floor((d-new Date(d.getFullYear(),0,0))/864e5),cs=Math.cos(2*Math.PI*(doy-198)/365);t='معدلات مناخ ورقلة لهذا الوقت من السنة: عظمى نحو '+(30+12*cs).toFixed(0)+'°م وصغرى نحو '+(16.5+11.5*cs).toFixed(0)+'°م، واحتمال المطر ضعيف جدًا (نحو 3% في نوفمبر). تهبّ رياح رملية أحيانًا؛ راجع التحذيرات الرسمية عبر الرابط أسفله. المحاكاة الآن: '+tempC.toFixed(0)+'°م ورياح '+windNow.toFixed(1)+' م/ث.'}
+    else{var r=[];if(phaseFault)r.push('انقطاع طور');if(pressFault)r.push('هبوط ضغط');if(windNow>8.5)r.push('رياح قوية');if(soc<25)r.push('بطارية منخفضة');if(burned)r.push('مضخة محترقة');if(!sdpOn)r.push('الحماية معطلة (وضع يدوي أصلي)');if(a<30)r.push('تربة جافة جدًا');t=r.length?'المخاطر الحالية: '+r.join('، ')+'.':'لا مخاطر ظاهرة حاليًا.'}
+    ANS.textContent=t;
+  }
+  [].forEach.call(document.querySelectorAll('.chips button'),function(b){b.onclick=function(){ans(b.getAttribute('data-q'))}});
+  setInterval(function(){try{advise()}catch(e){showErr(e)}},1200);
+  var prev=performance.now();
+  function loop(t){
+    requestAnimationFrame(loop);
+    var dt=Math.max(0,Math.min((t-prev)/1000,.1));prev=t;
+    if(running){var da=speed*.12*dt;ang+=da;pivot.rotation.y=-ang;wheels.forEach(function(w){w.rotation.y-=da*10})}
+    angEl.textContent=Math.round(((ang*180/Math.PI)%360+360)%360)+'°';
+    if(pumpOn){
+      for(var i=0;i<NP;i++){
+        if(pl[i]<0){pl[i]+=dt;continue}
+        pl[i]+=dt;pv[i*3+1]-=7*dt;pa[i*3]+=pv[i*3]*dt;pa[i*3+1]+=pv[i*3+1]*dt;pa[i*3+2]+=pv[i*3+2]*dt;
+        if(pa[i*3+1]<.1){rs(i)}
+      }
+      pg.attributes.position.needsUpdate=true;
+      prs.textContent=(3.1+Math.sin(t/700)*.08).toFixed(1)+' بار';flw.textContent=Math.round(150+Math.sin(t/900)*4)+' م³/س';
+    }
+    simH=stepClock(dt);
+    var dl=Math.max(0,Math.sin((simH-6)/12*Math.PI));
+    tempC=30+12*Math.sin((simH-9)/24*6.2832);
+    windNow+=((storm?11.5:4.5+2*Math.sin(simH*.7))-windNow)*Math.min(1,dt*.8);
+    rhNow=Math.max(8,45-(tempC-18)*1.3);
+    et0=.0375*(tempC+17.8)*3.74*(1+.02*(windNow-3))*(.4+.6*dl);
+    var kc=KC[+cropSel.value][+stageSel.value];etc=et0*kc;eff=windNow>8.5?.5:1;
+    var sm0=0;cells.forEach(function(c){sm0+=c.m});var avgM=sm0/cells.length;try{energyStep(dt,dl,t);anem.rotation.y+=windNow*dt*.9}catch(e){showErr(e)}try{extras(dt,t,dl)}catch(e){showErr(e)}
+    if(t-lastW>300){
+      lastW=t;var hh=Math.floor(simH),mm=Math.floor(simH%1*60);
+      wxEl.textContent='الساعة '+('0'+hh).slice(-2)+':'+('0'+mm).slice(-2)+' · '+tempC.toFixed(0)+'°م · رياح '+windNow.toFixed(1)+' م/ث · رطوبة الهواء '+rhNow.toFixed(0)+'%';
+      e0El.textContent=et0.toFixed(1);kcEl.textContent=kc.toFixed(2);etcEl.textContent=etc.toFixed(1);
+    }
+    if(autoOn&&t-lastAuto>1000){
+      lastAuto=t;var trig=Math.min(55,32+etc*2.5),hot=simH>=12&&simH<16,A=Math.round(avgM),msg;
+      if(tripped||burned){msg='وضع الحماية: العطل قائم، لا يبدأ الري حتى زواله أو إعادة الضبط.'}else if(windNow>8.5){setPump(false);setRun(false);msg='رياح '+windNow.toFixed(0)+' م/ث تتجاوز الحد الآمن (8.5): إيقاف الرش لتفادي الهدر وسوء التوزيع.'}else if(rain&&rainK>.5){setPump(false);setRun(false);msg='أمطار جارية: إيقاف الري والاستفادة من ماء المطر.'}
+      else if(pumpOn){
+        if(avgM>=72){setPump(false);setRun(false);msg='بلغت الرطوبة المتوسطة '+A+'%: إيقاف الري.'}
+        else msg='ري جارٍ: الرطوبة المتوسطة '+A+'% والهدف 72%.';
+      }else if(avgM<trig){
+        if(hot&&avgM>=25){setRun(false);msg='الرطوبة '+A+'% تحت العتبة '+Math.round(trig)+'% لكن الوقت ذروة حرارة (12–16): تأجيل الري لتقليل التبخر.'}
+        else{setRun(true);setPump(true);msg='الرطوبة '+A+'% أقل من العتبة '+Math.round(trig)+'% (ETc = '+etc.toFixed(1)+' مم/يوم): بدء الري.'}
+      }else{setRun(false);msg='الرطوبة كافية ('+A+'% مقابل عتبة '+Math.round(trig)+'%): لا حاجة للري.'}
+      decEl.textContent='القرار: '+msg;
+    }
+    if(autoOn&&pumpOn&&!tripped&&!burned&&windNow<=8.5){var ap=150*.15*dt,s0=+cSave.value/100;savedLive+=ap*s0/(1-s0)}
+    if(t-lastC>400){lastC=t;var cs=+cCost.value||0;$('lvM3').textContent=fm(savedLive)+' م³';$('lvD').textContent=fm(savedLive*cs)+' دج';svEl.textContent=fm(savedLive*cs)+' دج'}
+    if(sdpOn&&(phaseFault||pressFault)&&!tripped){
+      tripped=true;if(pumpOn)pb.onclick();if(running)btn.onclick();
+      sms(phaseFault?'انقطع أحد الأطوار الثلاثة (380V): فُصلت المضخة والمحور فورًا لحماية المضخة من الاحتراق.':'هبط ضغط الماء إلى 0.4 بار: احتمال انفجار أنبوب أو نضوب البئر. أُوقف المحور والمضخة.','red');
+    }
+    if(tripped&&!phaseFault&&!pressFault){tripped=false;sms('عاد الوضع الطبيعي: يُسمح بإعادة التشغيل.','green')}
+    if(!sdpOn&&phaseFault&&pumpOn&&!burned){burned=true;pb.onclick();sms('بدون SDP: احترقت المضخة بعد انقطاع الطور. تلف يقارب 80 مليون سنتيم ولم يصل أي تنبيه.','gray')}
+    if(!sdpOn&&pressFault&&pumpOn)wasted+=150*.15*dt;
+    if(burned){lamp.material.color.setHex(0x222222);pst.textContent='محترقة'}else if(tripped){lamp.material.color.setHex(0xf39c12);pst.textContent='محمية (مفصولة)'}
+    if(pressFault&&pumpOn)prs.textContent='0.4 بار';
+    if(t-lastF>300){lastF=t;linkEl.textContent='الاتصال: '+(netDown?'منقطع — عمل محلي + SMS':'4G متصل')+(wasted>1?' · ماء مهدور '+wasted.toFixed(0)+' م³':'')}
+    var aa=((ang%6.2832)+6.2832)%6.2832;
+    cells.forEach(function(c,i){
+      var ca=((i%NS)+.5)*Math.PI/4,dd=Math.abs(((aa-ca+Math.PI)%6.2832+6.2832)%6.2832-Math.PI);
+      if(pumpOn&&dd<Math.PI/8)c.m+=5*dt*eff;
+      c.m=Math.max(0,Math.min(100,c.m-.04*etc*dt+rainK*1.6*dt));
+    });
+    if(t-lastUI>250){
+      lastUI=t;cells.forEach(function(c){mcol(c.m,c.mat.color)});
+      nodes.forEach(function(n,i){
+        var m=n.cell.m,ec=n.cell.base*(1.3-m/150),s=st(m),rw=rowEls[i].children;
+        n.lamp.material.color.setHex(s[1]);rw[1].textContent=Math.round(m)+'%';rw[2].textContent=ec.toFixed(1);
+        rw[3].textContent=s[0];rw[3].style.borderInlineStartColor='#'+('000000'+s[1].toString(16)).slice(-6);
+      });
+    }
+    if(goal){
+      var k=.07;o.theta+=(goal.t-o.theta)*k;o.phi+=(goal.p-o.phi)*k;o.rad+=(goal.r-o.rad)*k;
+      if(goal.c){o.tx+=(goal.c[0]-o.tx)*k;o.ty+=(goal.c[1]-o.ty)*k;o.tz+=(goal.c[2]-o.tz)*k}
+    }
+    if(follow){pivot.updateMatrixWorld(true);endObj.getWorldPosition(tgt);o.tx+=(tgt.x-o.tx)*.2;o.ty+=(tgt.y-o.ty)*.2;o.tz+=(tgt.z-o.tz)*.2}
+    if(cine.on)cineStep(dt);else if(fps.on)fpsStep(dt);else place();renderer.render(scene,camera);
+  }
+  requestAnimationFrame(loop);
+  document.getElementById('gbtn').onclick=function(){document.getElementById('guide').classList.toggle('open')};document.getElementById('gx').onclick=function(){document.getElementById('guide').classList.remove('open')};
+})();
+</script>
+</body>
+</html>
