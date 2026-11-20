@@ -1,0 +1,11 @@
+/* SDP layer for simulation.html — CSS only, scene code untouched */
+:root{--accent:#0e2a22;--accent-ink:#fff;--sand:#d62828}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--accent:#7fc7d4;--accent-ink:#0e2a22}}
+:root[data-theme="dark"]{--accent:#7fc7d4;--accent-ink:#0e2a22}
+html,body{font-family:"IBM Plex Sans Arabic","Tajawal",system-ui,sans-serif}
+.snav{display:none!important}
+.card{border-radius:16px;box-shadow:0 12px 30px -14px rgba(14,42,34,.45)}button{border-radius:99px}button.sm{border-radius:12px}
+#simnav.simbar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translateX(-50%);z-index:9999;display:flex;gap:2px;align-items:center;padding:4px;border-radius:99px;background:#0e2a22;max-width:96vw;overflow-x:auto}
+.simbar a{color:#fff;padding:5px 12px;border-radius:99px;font-size:.8rem;white-space:nowrap}.simbar a.on{background:#d62828}
+.simbar .lang{display:flex;gap:2px;margin-inline-start:6px}.simbar .lang button{font:500 .72rem inherit;min-width:0;padding:3px 8px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}.simbar .lang button.on{background:#fff;color:#0e2a22}
+#guide .note{margin:0 0 10px;color:var(--ink-soft)}

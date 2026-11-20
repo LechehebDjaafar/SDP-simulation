@@ -1,19 +1,4 @@
-<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>الإحصائيات — SDP</title>
-<meta name="description" content="صندوق ترقية ذكي يُركَّب على أي محور ري قائم: تحكم عن بعد، حماية المضخة، قياس التربة، وطاقة شمسية.">
-<meta name="theme-color" content="#07503f"><link rel="icon" href="assets/favicon.png">
-<script>if(!matchMedia('(prefers-reduced-motion:reduce)').matches)document.documentElement.classList.add('gx')</script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500&family=Readex+Pro:wght@300;400;500;600&display=swap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.17/dist/lenis.css">
-<link rel="stylesheet" href="css/app.css"></head>
-<body class="dash">
-<div class="curtain" aria-hidden="true"><span class="cnt">0</span><small>Smart Desert Pivot</small></div><i class="cursor" aria-hidden="true"></i>
-<header class="nav"><a class="brand" href="index.html"><img src="assets/logo.png" alt="SDP"><b>Smart Desert Pivot</b></a>
-<nav><a href="index.html" class="">الرئيسية</a><a href="solution.html" class="">الحل التقني</a><a href="simulation.html" class="">محاكاة الحقل</a><a href="stats.html" class="on">الإحصائيات</a></nav>
-<a class="btn sm light" data-mag href="simulation.html">ابدأ المحاكاة</a></header>
-<main><header class="hero small"><div class="wrap"><p class="eyebrow hero-in"><span class="live">بيانات تشغيلية نموذجية</span></p><h1 class="h1 xl" id="hero-h1">لوحة الإحصائيات والمنحنيات</h1><p class="lead hero-in">يوم تشغيل كامل لمحور مرقّى: 24 ساعة تُعرض في نحو 3 دقائق.</p></div></header>
-<section class="sec"><div class="wrap"><div class="kpis" id="kp"></div>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>SDP</title><meta name="theme-color" content="#0e2a22"><meta property="og:title" content="Smart Desert Pivot"><meta property="og:description" content="Retrofit smart irrigation pivot — Algeria"><meta property="og:image" content="https://lechehebdjaafar.github.io/SDP-simulation/assets/logo.png"><link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap"><link rel="stylesheet" href="css/sdp.css"></head><body data-title="n_stats"><header class="top"><a class="brand" href="index.html"><img src="assets/logo.png" alt="SDP"><b>Smart Desert Pivot</b></a><span class="lang"><button data-lang="ar">ع</button><button data-lang="fr">FR</button><button data-lang="en">EN</button></span></header><nav class="tabs"><a href="index.html" data-i18n="n_home">الرئيسية</a><a href="problem.html" data-i18n="n_prob">المشكلة</a><a href="solution.html" data-i18n="n_sol">الحل</a><a href="prototype.html" data-i18n="n_proto">النموذج</a><a href="impact.html" data-i18n="n_imp">الأهداف</a><a href="simulation.html" data-i18n="n_sim">المحاكاة</a><a href="stats.html" class=on data-i18n="n_stats">الإحصائيات</a></nav><main><section class="sec dash"><div class="wrap"><p class="eyebrow"><span class="live">بيانات تشغيلية نموذجية</span></p><h1 class="h2">لوحة الإحصائيات والمنحنيات</h1><p class="lead">يوم تشغيل كامل لمحور مرقّى: 24 ساعة تُعرض في نحو 3 دقائق.</p><div class="kpis" id="kp"></div>
 <div class="charts">
 <div class="ch"><h3>متوسط رطوبة التربة %</h3><canvas id="c1"></canvas><div class="lg"><span><i style="background:#58c28f"></i>الرطوبة</span><span><i style="background:#e0a65a"></i>عتبة بدء الري</span></div></div>
 <div class="ch"><h3>الطاقة: إنتاج شمسي مقابل الحمل (kW)</h3><canvas id="c2"></canvas><div class="lg"><span><i style="background:#ffd23f"></i>شمس</span><span><i style="background:#ff9f43"></i>حمل</span></div></div>
@@ -21,13 +6,4 @@
 <div class="ch"><h3>التبخر ET0 (مم/يوم) والحرارة</h3><canvas id="c4"></canvas><div class="lg"><span><i style="background:#4aa3ff"></i>ET0</span><span><i style="background:#ff6b6b"></i>الحرارة °م</span></div></div>
 <div class="ch"><h3>رطوبة القطاعات الثمانية</h3><canvas id="c5"></canvas></div>
 <div class="ch"><h3>مصدر الطاقة المستهلكة</h3><canvas id="c6"></canvas><div class="lg"><span><i style="background:#ffd23f"></i>شمس</span><span><i style="background:#4cd964"></i>بطارية</span><span><i style="background:#4aa3ff"></i>شبكة</span></div></div>
-</div></div></section></main>
-<footer class="foot"><div class="wrap"><div class="fcols"><div><b>Smart Desert Pivot</b><p>صندوق ترقية يمنح أي محور ري قائم تحكمًا عن بعد، وحماية، وقياسًا للتربة، وتغذية شمسية.</p></div>
-<div><a href="index.html">الرئيسية</a><a href="solution.html">الحل التقني</a><a href="simulation.html">محاكاة الحقل</a><a href="stats.html">الإحصائيات</a></div>
-<div><p>علامة «مشروع مبتكر» رقم 09072522272<br>جامعة قاصدي مرباح ورقلة</p></div></div></div><div class="fw" aria-hidden="true">SDP</div></footer>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/DrawSVGPlugin.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.17/dist/lenis.min.js"></script>
-<script src="js/app.js"></script><script src="js/stats.js"></script></body></html>
+</div></div></section></main><footer class="foot"><div class="wrap"><p data-i18n="label">علامة «مشروع مبتكر» رقم 09072522272 · جامعة قاصدي مرباح ورقلة</p></div></footer><script src="js/i18n.js"></script><script src="js/tr.js"></script><script src="js/stats.js"></script></body></html>

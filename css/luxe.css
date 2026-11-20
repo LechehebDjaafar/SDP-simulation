@@ -1,0 +1,30 @@
+/* SDP luxe layer — loaded after app.css; remove this file to revert */
+:root{--forest:#06382d;--lime:#dcbc62;--gold:#b8913a;--bone:#f5f1e6;--ash:#ebe6d6;--ink:#14201b;--graphite:#3a4540;--sky:#dde6df;--peach:#eee2c6;--sage:#d9e1cd;--moss:#b9c3a4;--head:"El Messiri","Readex Pro",serif}
+body{background:var(--bone);font-weight:300;font-size:1.05rem}
+.h1,.h2,.scard h3,.hz-p h3,.card h3,.tl-i h3{font-weight:600;letter-spacing:0}
+.h1 em{background:linear-gradient(135deg,#0a4a3b,#052b22);color:var(--lime);border:1px solid rgba(220,188,98,.5)}
+.eyebrow{color:var(--gold);letter-spacing:0;font-weight:600}.eyebrow:before{height:1px;width:40px;background:var(--gold)}.eyebrow.lime{color:var(--lime)}.eyebrow.lime:before{background:var(--lime)}
+.nav{background:rgba(6,56,45,.84);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(220,188,98,.35);box-shadow:0 12px 40px -12px rgba(0,0,0,.45)}
+.nav nav a.on{background:var(--lime);color:#1a1405}
+.btn{background:linear-gradient(135deg,#e8cd82,#b8913a);color:#1a1405;border:0;font-weight:600;box-shadow:0 10px 26px -10px rgba(184,145,58,.8)}
+.btn:hover{background:linear-gradient(135deg,#f1d98f,#c9a24b);color:#1a1405;filter:brightness(1.04)}
+.btn.ghost{background:transparent;color:var(--forest);border:1px solid var(--forest);box-shadow:none}.btn.ghost:hover{background:var(--forest);color:var(--lime)}
+.btn.light{background:linear-gradient(135deg,#f6edd0,#e0c57a);color:#1a1405}
+.hero-media{position:relative;border-radius:28px;box-shadow:0 50px 90px -40px rgba(6,40,31,.55)}.hero-media:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,40,31,0) 50%,rgba(6,40,31,.5))}
+.track{color:transparent;-webkit-text-stroke:1px var(--forest)}.track i{color:var(--gold);-webkit-text-stroke:0}
+.scard{border-radius:26px;box-shadow:0 24px 60px -30px rgba(6,40,31,.35);border:1px solid rgba(6,56,45,.08)}.hz-p{border-radius:22px;border:1px solid rgba(6,56,45,.1)}.card{border-radius:22px}
+.big-n{color:var(--gold);font-weight:400}.chip{border-color:var(--gold);color:var(--forest)}
+.sec.forest{background:radial-gradient(1200px 500px at 85% -10%,#0d5a49,transparent 60%),var(--forest)}
+.num{border-top:1px solid rgba(220,188,98,.55)}.num b{font-weight:400}
+.tl-line:after{background:linear-gradient(var(--gold),var(--forest))}.tl-i:before{border-color:var(--gold)}
+.gal figure{position:relative;border-radius:22px;box-shadow:0 30px 60px -34px rgba(6,40,31,.5)}
+.gal figcaption{position:absolute;inset:auto 0 0 0;padding:44px 20px 14px;color:#fff;font:400 .82rem var(--body);background:linear-gradient(transparent,rgba(6,40,31,.78))}
+.credit{font-size:.8rem;color:var(--graphite);opacity:.85;margin-top:16px}.credit a{border-bottom:1px solid var(--gold)}
+.vsec{background:linear-gradient(180deg,var(--bone),var(--ash))}
+.vid{position:relative;aspect-ratio:16/9;margin-top:40px;border-radius:26px;overflow:hidden;background:#06261e;border:1px solid rgba(220,188,98,.55);box-shadow:0 60px 100px -50px rgba(6,40,31,.7);cursor:pointer}
+.vid img{width:100%;height:100%;object-fit:cover;opacity:.82;transition:opacity .4s,transform 1.2s}.vid:hover img{opacity:1;transform:scale(1.03)}
+.vid button{position:absolute;inset:0;margin:auto;width:92px;height:92px;border-radius:50%;border:0;cursor:pointer;color:#1a1405;background:linear-gradient(135deg,#f1d98f,#b8913a);display:grid;place-items:center;box-shadow:0 0 0 14px rgba(220,188,98,.25)}
+.vid button svg{margin-inline-start:-4px}.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.facts{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:34px}.facts div{padding:22px 24px;border-radius:20px;background:#fff;border:1px solid rgba(184,145,58,.4)}.facts b{display:block;font:600 1.35rem var(--head);color:var(--forest)}.facts span{color:var(--graphite);font-size:.9rem}
+.foot{background:linear-gradient(180deg,#06382d,#04251d)}.fw{color:var(--lime);opacity:.9}
+:focus-visible{outline:3px solid var(--lime);outline-offset:3px}

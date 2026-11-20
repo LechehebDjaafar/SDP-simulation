@@ -89,13 +89,13 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .guide{position:fixed;z-index:25;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,92%);max-height:70%;overflow:auto;display:none;font-size:.84rem;line-height:1.7}
 .guide.open{display:block}.guide h3{margin:0 0 8px}.guide li{margin-bottom:6px}.guide .sw{vertical-align:middle;margin-inline-end:6px}
 </style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="css/luxe-sim.css">
 </head>
-<body><nav id="simnav" style="position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translateX(-50%);z-index:9999;display:flex;gap:2px;padding:4px;border-radius:100px;background:#07503f;font-family:Tajawal,system-ui,sans-serif;direction:rtl">
-<a href="index.html" style="color:#fff;background:transparent;text-decoration:none;padding:5px 14px;border-radius:100px;font-size:.82rem;white-space:nowrap">الرئيسية</a><a href="solution.html" style="color:#fff;background:transparent;text-decoration:none;padding:5px 14px;border-radius:100px;font-size:.82rem;white-space:nowrap">الحل التقني</a><a href="simulation.html" style="color:#212529;background:#fff;text-decoration:none;padding:5px 14px;border-radius:100px;font-size:.82rem;white-space:nowrap">محاكاة الحقل</a><a href="stats.html" style="color:#fff;background:transparent;text-decoration:none;padding:5px 14px;border-radius:100px;font-size:.82rem;white-space:nowrap">الإحصائيات</a>
-</nav>
+<body><nav id="simnav" class="simbar"><a href="index.html" data-i18n="n_home">الرئيسية</a><a href="problem.html" data-i18n="n_prob">المشكلة</a><a href="solution.html" data-i18n="n_sol">الحل</a><a href="prototype.html" data-i18n="n_proto">النموذج</a><a href="impact.html" data-i18n="n_imp">الأهداف</a><a href="simulation.html" class=on data-i18n="n_sim">المحاكاة</a><a href="stats.html" data-i18n="n_stats">الإحصائيات</a><span class="lang"><button data-lang="ar">ع</button><button data-lang="fr">FR</button><button data-lang="en">EN</button></span></nav>
 <div class="snav"><a class="b" href="index.html"><img src="assets/logo.png" alt="SDP">SDP</a><nav><a href="index.html">الرئيسية</a> <a href="simulation.html" class="on">المحاكاة</a> <a href="stats.html">الإحصائيات</a></nav></div>
 <div id="err" role="alert"></div>
-<div class="card guide" id="guide"><h3>ما الذي تضيفه SDP؟ (الإطار الأحمر)</h3><ul>
+<div class="card guide" id="guide"><h3 data-i18n="n_sim"></h3><p class="note" data-i18n="sim_how">اسحب لتدوير المشهد، وقرّب بالعجلة أو بإصبعين. أزرار الأسفل تشغّل المضخة وتغيّر السرعة، و«جولة بمنظور الشخص الأول» للتجول داخل الحقل.</p><h3>ما الذي تضيفه SDP؟ (الإطار الأحمر)</h3><ul>
 <li><b>خزانة التحكم (ESP32-S3):</b> تقرر الري والحماية محليًا.</li><li><b>عقد التربة السبع:</b> رطوبة وملوحة عبر LoRa.</li><li><b>حساس الضغط وصندوق الطرف:</b> يكشفان هبوط الضغط وحالة الذراع.</li><li><b>صندوق حماية المضخة:</b> يفصل عند قطع الطور.</li><li><b>محطة الأرصاد:</b> حرارة ورياح لحساب ETc.</li><li><b>محطة الطاقة (خارج الحقل):</b> ألواح ← منظّم MPPT ← بطاريات ← عاكس ← ATS، مع الشبكة العمومية احتياطًا.</li></ul>
 <p class="note" style="color:var(--ink-soft)">زر «محطة الطاقة» في الزوايا ينقلك إليها. كل القيم محاكاة.</p><button id="gx" type="button" class="sm" style="min-width:0">إغلاق</button></div>
 <div id="scene"></div>
@@ -167,6 +167,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>window.THREE||document.write('<script src="assets/vendor/three.min.js"><\/script>')</script>
 <script>
 var errEl=document.getElementById('err');function showErr(e){if(errEl){errEl.style.display='block';errEl.textContent='خطأ برمجي: '+(e&&e.message||e)}}
 window.addEventListener('error',function(e){showErr(e.message)});
@@ -441,7 +442,7 @@ if(typeof THREE==='undefined'){showErr('تعذّر تحميل مكتبة Three.j
   }
   var ptrs={},last=0;
   function pd(){var k=Object.keys(ptrs);if(k.length<2)return 0;var a=ptrs[k[0]],b=ptrs[k[1]];return Math.hypot(a.x-b.x,a.y-b.y)}
-  wrap.addEventListener('pointerdown',function(e){wrap.setPointerCapture(e.pointerId);ptrs[e.pointerId]={x:e.clientX,y:e.clientY};last=pd();goal=null});
+  wrap.addEventListener('pointerdown',function(e){try{wrap.setPointerCapture(e.pointerId)}catch(_){}ptrs[e.pointerId]={x:e.clientX,y:e.clientY};last=pd();goal=null});
   wrap.addEventListener('pointerup',function(e){delete ptrs[e.pointerId]});
   wrap.addEventListener('pointercancel',function(e){delete ptrs[e.pointerId]});
   wrap.addEventListener('pointermove',function(e){
@@ -832,5 +833,5 @@ if(typeof THREE==='undefined'){showErr('تعذّر تحميل مكتبة Three.j
   document.getElementById('gbtn').onclick=function(){document.getElementById('guide').classList.toggle('open')};document.getElementById('gx').onclick=function(){document.getElementById('guide').classList.remove('open')};
 })();
 </script>
-</body>
+<script>try{if(!localStorage.getItem("sdp_tour")){localStorage.setItem("sdp_tour","1");document.getElementById("guide").classList.add("open")}}catch(e){}</script><script src="js/i18n.js"></script><script src="js/tr.js"></script></body>
 </html>
